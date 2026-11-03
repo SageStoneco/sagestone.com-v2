@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { Container, Section } from "../components/ui-brand/primitives";
 import { FAQAccordion, PageHero, CTABand } from "../components/ui-brand/components";
-import { faqs } from "../content/site";
+import { faqs as baseFaqs } from "../content/site";
+import { pricingFaqs } from "../content/pricing";
+
+const faqs = [...pricingFaqs.map((f) => ({ ...f, category: "Pricing" })), ...baseFaqs];
 
 export function FAQ() {
   const categories = useMemo(
@@ -30,7 +33,7 @@ export function FAQ() {
                 onClick={() => setActive(c)}
                 className={`rounded-full px-5 py-2.5 text-[0.9rem] transition-colors ${
                   active === c
-                    ? "bg-sage text-cloud dark:text-pine"
+                    ? "bg-sage-ink text-cloud dark:text-pine"
                     : "border border-border text-charcoal hover:border-sage/40 dark:text-chalk"
                 }`}
               >

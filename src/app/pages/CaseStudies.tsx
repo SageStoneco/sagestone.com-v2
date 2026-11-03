@@ -13,7 +13,7 @@ export function CaseStudies() {
 
       <Section className="pt-6 pb-20 md:pb-28">
         <Container>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className={`grid gap-8 ${caseStudies.length > 1 ? "md:grid-cols-2 lg:grid-cols-3" : "max-w-xl"}`}>
             {caseStudies.map((s) => (
               <CaseStudyCard key={s.slug} study={s} />
             ))}
@@ -47,15 +47,17 @@ export function CaseStudies() {
         </Container>
       </Section>
 
-      <Section className="py-28 md:py-40">
-        <Container>
-          <div className="grid gap-8 lg:grid-cols-3">
-            {testimonials.map((t) => (
-              <TestimonialCard key={t.name} {...t} />
-            ))}
-          </div>
-        </Container>
-      </Section>
+      {testimonials.length > 0 && (
+        <Section className="py-28 md:py-40">
+          <Container>
+            <div className="grid gap-8 lg:grid-cols-3">
+              {testimonials.map((t) => (
+                <TestimonialCard key={t.name} {...t} />
+              ))}
+            </div>
+          </Container>
+        </Section>
+      )}
 
       <CTABand />
     </>

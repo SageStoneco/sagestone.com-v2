@@ -1,0 +1,20 @@
+# SageStone
+
+> SageStone connects U.S. businesses with dedicated virtual assistants, customer support, executive assistance, back-office and remote operations talent based in the Philippines. Engagements begin onboarding within 24–72 hours of a discovery call, and SageStone stays involved with ongoing oversight.
+
+## Services
+- [Virtual Assistant Services](https://www.sagestoneinc.com/services/virtual-assistant-services): inbox, calendar, research and admin support
+- [Customer Support Outsourcing](https://www.sagestoneinc.com/services/customer-support-outsourcing): email, chat and help-desk support
+- [Workflow Support](https://www.sagestoneinc.com/services/workflow-support): process mapping and coordination
+- [Back Office Support](https://www.sagestoneinc.com/services/back-office-support): data, documentation and administrative work
+- [Executive Assistant Services](https://www.sagestoneinc.com/services/executive-assistant-services): senior, discreet support for leaders
+- [Remote Operations Support](https://www.sagestoneinc.com/services/remote-operations-support): embedded operators for scaling teams
+
+## Key pages
+- [How It Works](https://www.sagestoneinc.com/how-it-works)
+- [Pricing](https://www.sagestoneinc.com/pricing)
+- [Why the Philippines](https://www.sagestoneinc.com/why-philippines)
+- [FAQ](https://www.sagestoneinc.com/faq)
+- [Case Studies](https://www.sagestoneinc.com/case-studies)
+- [Blog](https://www.sagestoneinc.com/blog)
+- [Contact / Book a discovery call](https://www.sagestoneinc.com/contact)

@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { MotionConfig } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
-import { Layout } from "./components/layout/Layout";
+import { Layout, LandingLayout } from "./components/layout/Layout";
 import { Home } from "./pages/Home";
 
 // Home stays eager (the landing route → best LCP). The rest split into
@@ -25,6 +25,9 @@ const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.C
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => import("./pages/Terms").then((m) => ({ default: m.Terms })));
 const SmsTerms = Terms;
+const Pricing = lazy(() => import("./pages/Pricing").then((m) => ({ default: m.Pricing })));
+const ThankYou = lazy(() => import("./pages/ThankYou").then((m) => ({ default: m.ThankYou })));
+const Landing = lazy(() => import("./pages/Landing").then((m) => ({ default: m.Landing })));
 const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
 
 // Router-agnostic app tree: wrapped in BrowserRouter on the client (below)
@@ -49,11 +52,16 @@ export function AppRoutes() {
           <Route path="/case-studies" element={<CaseStudies />} />
           <Route path="/case-studies/kuha" element={<KuhaCaseStudy />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/contact/thank-you" element={<ThankYou />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/sms-terms" element={<SmsTerms />} />
           <Route path="*" element={<NotFound />} />
+        </Route>
+        <Route element={<LandingLayout />}>
+          <Route path="/lp/:slug" element={<Landing />} />
         </Route>
       </Routes>
       <Analytics />

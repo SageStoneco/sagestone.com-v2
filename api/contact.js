@@ -14,10 +14,17 @@
  *   CONTACT_FROM        optional. Defaults to noreply@sagestoneinc.com. Must be
  *                       on a domain verified in ZeptoMail.
  *   CONTACT_TO          optional. Defaults to hello@sagestoneinc.com.
+ *   VITE_BOOKING_URL    optional. Scheduling link added to the confirmation email.
+ *   CRM_WEBHOOK_URL     optional. Each lead is POSTed here as JSON (Zoho Flow,
+ *                       Make, Zapier or a CRM's own webhook) to create a CRM lead.
+ *   META_PIXEL_ID +
+ *   META_CAPI_TOKEN     optional. Sends a server-side "Lead" event to Meta's
+ *                       Conversions API, deduplicated with the browser pixel.
  *
  * See docs/contact-form-setup.md.
  */
 
+import { createHash } from "node:crypto";
 import { validateContact, COMPANY_MAX } from "../src/app/lib/contact-rules.js";
 
 const DEFAULT_API_URL = "https://api.zeptomail.com/v1.1/email";
@@ -67,10 +74,15 @@ export async function POST(request) {
     phone: clean(data.phone, 25),
     company: clean(data.company, COMPANY_MAX),
     service: clean(data.service, 80),
+    hours: clean(data.hours, 40),
+    timeline: clean(data.timeline, 40),
     message: clean(data.message, 2000),
     smsConsent: data.smsConsent === true,
     smsConsentAt: data.smsConsent === true ? clean(data.smsConsentAt, 40) : "",
     page: clean(data.page, 200),
+    attribution: cleanAttribution(data.attribution),
+    eventId: clean(data.eventId, 64),
+    ip: clean((request.headers.get("x-forwarded-for") || "").split(",")[0], 64),
     userAgent: clean(request.headers.get("user-agent"), 300),
     receivedAt: new Date().toISOString(),
   };
@@ -94,7 +106,100 @@ export async function POST(request) {
     console.error("contact: confirmation failed", err);
   }
 
+  // CRM and ad-platform hand-offs are best-effort: the team already has the
+  // lead by email, so a failure here is logged, never shown to the visitor.
+  await Promise.allSettled([sendToCrm(submission), sendMetaLead(submission)]).then((results) =>
+    results.forEach((r) => r.status === "rejected" && console.error("contact: hand-off failed", r.reason))
+  );
+
   return json(200, { ok: true });
+}
+
+const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "gbraid", "wbraid", "fbclid", "li_fat_id", "msclkid", "landing_page", "referrer"];
+
+function cleanAttribution(value) {
+  const out = {};
+  if (!value || typeof value !== "object") return out;
+  for (const k of ATTRIBUTION_KEYS) {
+    const v = clean(value[k], 300);
+    if (v) out[k] = v;
+  }
+  return out;
+}
+
+function sourceLine(a) {
+  if (a.utm_source || a.utm_medium || a.utm_campaign) {
+    return [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean).join(" / ");
+  }
+  if (a.gclid || a.gbraid || a.wbraid) return "Google Ads (click ID)";
+  if (a.fbclid) return "Meta (click ID)";
+  if (a.li_fat_id) return "LinkedIn (click ID)";
+  if (a.referrer) return `Referral: ${a.referrer}`;
+  return "Direct / unknown";
+}
+
+async function sendToCrm(s) {
+  const url = process.env.CRM_WEBHOOK_URL?.trim();
+  if (!url) return;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: s.name,
+      first_name: s.name.split(/\s+/)[0],
+      last_name: s.name.split(/\s+/).slice(1).join(" "),
+      email: s.email,
+      phone: s.phone,
+      company: s.company,
+      service: s.service,
+      hours: s.hours,
+      timeline: s.timeline,
+      message: s.message,
+      sms_consent: s.smsConsent,
+      sms_consent_at: s.smsConsentAt,
+      lead_source: sourceLine(s.attribution),
+      ...s.attribution,
+      form_page: s.page,
+      received_at: s.receivedAt,
+    }),
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!res.ok) throw new Error(`CRM webhook ${res.status}`);
+}
+
+const sha256 = (v) => createHash("sha256").update(v).digest("hex");
+
+async function sendMetaLead(s) {
+  const pixel = process.env.META_PIXEL_ID?.trim();
+  const token = process.env.META_CAPI_TOKEN?.trim();
+  if (!pixel || !token) return;
+  const phone = s.phone.replace(/\D/g, "");
+  const user_data = {
+    em: [sha256(s.email.toLowerCase())],
+    ...(phone ? { ph: [sha256(phone)] } : {}),
+    ...(s.ip ? { client_ip_address: s.ip } : {}),
+    ...(s.userAgent ? { client_user_agent: s.userAgent } : {}),
+    ...(s.attribution.fbclid ? { fbc: `fb.1.${Date.now()}.${s.attribution.fbclid}` } : {}),
+  };
+  const res = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(pixel)}/events?access_token=${encodeURIComponent(token)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      data: [
+        {
+          event_name: "Lead",
+          event_time: Math.floor(Date.now() / 1000),
+          ...(s.eventId ? { event_id: s.eventId } : {}),
+          action_source: "website",
+          event_source_url: `${SITE}${s.page || "/contact"}`,
+          user_data,
+          custom_data: { content_name: s.service },
+        },
+      ],
+    }),
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!res.ok) throw new Error(`Meta CAPI ${res.status}: ${(await res.text()).slice(0, 300)}`);
 }
 
 function mailer(token) {
@@ -129,8 +234,13 @@ function notification(s) {
     ["Phone", s.phone],
     ["Company", s.company],
     ["Service", s.service],
+    ["Hours", s.hours],
+    ["Timeline", s.timeline],
+    ["Source", sourceLine(s.attribution)],
     ["SMS consent", consent],
     ["Page", s.page],
+    ["Landing page", s.attribution.landing_page],
+    ["Campaign", [s.attribution.utm_campaign, s.attribution.utm_term, s.attribution.utm_content].filter(Boolean).join(" · ")],
     ["Received", s.receivedAt],
     ["User agent", s.userAgent],
   ];
@@ -138,13 +248,13 @@ function notification(s) {
   const text = [
     "New contact form submission from sagestoneinc.com",
     "",
-    ...rows.slice(0, 5).map(([k, v]) => `${`${k}:`.padEnd(10)} ${v || "—"}`),
+    ...rows.slice(0, 8).map(([k, v]) => `${`${k}:`.padEnd(10)} ${v || "—"}`),
     "",
     "Message:",
     s.message,
     "",
     "---",
-    ...rows.slice(5).map(([k, v]) => `${`${k}:`.padEnd(12)} ${v || "—"}`),
+    ...rows.slice(8).map(([k, v]) => `${`${k}:`.padEnd(12)} ${v || "—"}`),
   ].join("\n");
 
   const detailRow = ([k, v]) =>
@@ -156,14 +266,14 @@ function notification(s) {
     body:
       heading("New website enquiry") +
       `<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:15px;line-height:1.5;margin:0 0 20px">` +
-      rows.slice(0, 5).map(detailRow).join("") +
+      rows.slice(0, 8).map(detailRow).join("") +
       `</table>` +
       `<p style="margin:0 0 6px;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:${C.muted}">Message</p>` +
       `<div style="margin:0 0 24px;padding:16px 18px;background:${C.ivory};border-left:3px solid ${C.sage};border-radius:4px;white-space:pre-wrap;font-size:15px;line-height:1.6;color:${C.ink}">${escapeHtml(s.message)}</div>` +
       button(`mailto:${s.email}`, `Reply to ${s.name.split(/\s+/)[0]}`) +
       `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;font-size:12px;line-height:1.5;border-top:1px solid ${C.rule};width:100%">` +
       `<tr><td style="height:12px"></td></tr>` +
-      rows.slice(5).map(detailRow).join("") +
+      rows.slice(8).map(detailRow).join("") +
       `</table>`,
   });
 
@@ -186,6 +296,7 @@ function confirmation(s) {
   // Names only: anything that looks like a link or address becomes "there".
   if (!/^[\p{L}'’-]+$/u.test(firstName)) firstName = "there";
   const to = process.env.CONTACT_TO?.trim() || DEFAULT_TO;
+  const booking = bookingUrl();
 
   const text = [
     `Hi ${firstName},`,
@@ -194,6 +305,7 @@ function confirmation(s) {
     "one of our team members will reach out as soon as we can, usually within",
     "one business day.",
     "",
+    ...(booking ? ["Want to skip the back-and-forth? Pick a time for your discovery call here:", booking, ""] : []),
     "If you need to add anything in the meantime, just reply to this email.",
     "",
     "Warm regards,",
@@ -209,9 +321,10 @@ function confirmation(s) {
       `<div style="font-size:16px;line-height:1.65;color:${C.ink}">` +
       p(`Hi ${escapeHtml(firstName)},`) +
       p("Thank you for reaching out to SageStone. We have received your inquiry, and one of our team members will reach out as soon as we can, usually within one business day.") +
+      (booking ? p("Want to skip the back-and-forth? Pick a time for your discovery call now.") : "") +
       p("If you need to add anything in the meantime, just reply to this email.") +
       `</div>` +
-      `<div style="margin:8px 0 28px">${button(`${SITE}/how-it-works`, "See how we work")}</div>` +
+      `<div style="margin:8px 0 28px">${booking ? button(booking, "Choose a time") : button(`${SITE}/how-it-works`, "See how we work")}</div>` +
       `<p style="margin:0;font-size:16px;line-height:1.6;color:${C.ink}">Warm regards,<br><strong>The SageStone Team</strong></p>`,
   });
 
@@ -223,6 +336,11 @@ function confirmation(s) {
     textbody: text,
     htmlbody: html,
   };
+}
+
+function bookingUrl() {
+  const u = (process.env.BOOKING_URL || process.env.VITE_BOOKING_URL || "").trim();
+  return /^https:\/\//.test(u) ? u : "";
 }
 
 // ---------- Branded email layout ----------

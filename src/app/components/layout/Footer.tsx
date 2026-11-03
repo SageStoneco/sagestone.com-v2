@@ -10,10 +10,12 @@ import { FOUNDER } from "../../content/founder";
 const companyLinks = [
   { label: "About", to: "/about" },
   { label: "How It Works", to: "/how-it-works" },
+  { label: "Pricing", to: "/pricing" },
   { label: "Case Studies", to: "/case-studies" },
   { label: "Why the Philippines", to: "/why-philippines" },
   { label: "FAQ", to: "/faq" },
   { label: "Contact", to: "/contact" },
+  { label: "Client Support", to: "/contact#existing-clients" },
 ];
 
 const resourceLinks = [

@@ -350,10 +350,10 @@ td.num{font-family:var(--display);font-size:1.05rem;color:var(--gold);font-varia
 <p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add one lead magnet tied to the existing posts, such as a "Delegation Task List" PDF or a "VA onboarding checklist", and nurture with a five-email sequence.</span></p></li>
 <li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>The brand name is written two ways</div>
 <p>The privacy policy, SMS terms, SMS consent text, footer logo text and those pages' titles use "Sage Stone". Everywhere else the site uses "SageStone".</p>
-<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Standardize on "SageStone" in display text, and use "SageStone Inc." for legal entity references.</span></p></li>
-<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Homepage has no Organization schema; two titles are thin</div>
-<p>The homepage is the only content page without JSON-LD. <code>/faq</code> has the title "FAQ | SageStone" (15 characters) and <code>/case-studies</code> has "Case Studies | SageStone" (24 characters). No <code>llms.txt</code> is published.</p>
-<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add Organization and WebSite JSON-LD with logo, sameAs links and contactPoint. Retitle the two pages, for example "Virtual Assistant &amp; Outsourcing FAQ | SageStone".</span></p></li>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Keep "Sage Stone" in the SMS consent text and SMS terms if that is the brand name registered for A2P 10DLC, because carriers check that it matches exactly. Elsewhere, standardize on "SageStone", and confirm whether the legal name is "SageStone Inc." or "Sage Stone Inc." (both appear).</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Two page titles are thin</div>
+<p>Correction: Organization and WebSite JSON-LD are already in <code>index.html</code> on every page. An earlier draft of this report missed them because of how the crawler matched the JSON. <code>/faq</code> has the title "FAQ | SageStone" (15 characters) and <code>/case-studies</code> has "Case Studies | SageStone" (24 characters). No <code>llms.txt</code> is published.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add a contactPoint to the existing Organization schema, publish an <code>llms.txt</code>, and retitle the two pages, for example "Virtual Assistant &amp; Outsourcing FAQ | SageStone".</span></p></li>
 <li class="ok rv"><div class="t"><svg class="ico"><use href="#i-check"/></svg><span class="pill">Keep</span>What's working</div>
 <p>The voice is calm and specific. Service, industry and solution pages are keyword-led and interlinked, every URL in the sitemap returns 200, unknown URLs return a real 404, and the blog posts use BlogPosting schema.</p></li>
 </ul>
@@ -521,11 +521,6 @@ td.num{font-family:var(--display);font-size:1.05rem;color:var(--gold);font-varia
   <div class="legend"><span><i></i>Under 2,500 ms (good)</span><span><i class="warn"></i>At the 2,500 ms threshold</span></div>
 </div>
 
-<div class="chart rv" aria-label="Font bytes downloaded per page load">
-  <h4>Font download per page (KB)</h4>
-  <div class="bar"><span class="lab">Desktop</span><span class="bg"><span class="fg" style="--w:14.6%"></span></span><span class="val">113</span></div>
-  <div class="bar"><span class="lab">Phone</span><span class="bg"><span class="fg warn" style="--w:100%"></span></span><span class="val">775</span></div>
-</div>
 
 <ul class="f">
 <li class="high rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">High</span>Mobile menu button is cut off</div>
@@ -534,9 +529,9 @@ td.num{font-family:var(--display);font-size:1.05rem;color:var(--gold);font-varia
 <li class="high rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">High</span>Primary CTA fails contrast</div>
 <p>Ivory text on sage measures 3.42:1. WCAG AA needs 4.5:1 for text of this size, and the product brief targets AA.</p>
 <p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Use the existing <code>--sage-ink</code> (#59634F) as the button background. With ivory text it passes at about 6:1.</span></p></li>
-<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Layout shift and font weight on mobile</div>
-<p>The homepage on a phone measured CLS 0.109, just above the 0.1 "good" threshold, and downloaded nearly seven times the font data of desktop.</p>
-<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Self-host only the Fraunces weights you use as WOFF2 subsets, preload the display face, and set <code>size-adjust</code> fallbacks so text doesn't shift when the font loads.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Small layout shift on mobile</div>
+<p>The homepage on a phone measured CLS 0.109, just above the 0.1 "good" threshold. Correction: an earlier draft reported a 775 KB font download on phones. That came from the test's shortened browser ID, which made Google Fonts send older TTF files. Real iPhones receive WOFF2 at a size similar to desktop.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Recheck CLS with real-device field data from Vercel Speed Insights before changing anything; it may also have been inflated by the TTF fonts in the test.</span></p></li>
 <li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Hotlinked stock images</div>
 <p>The service pages still load images from images.unsplash.com, and <code>site.ts</code> defines Unsplash stock portraits.</p>
 <p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Replace them with real team photos, self-hosted as WebP with width and height set.</span></p></li>
