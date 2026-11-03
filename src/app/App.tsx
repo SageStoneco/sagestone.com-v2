@@ -25,6 +25,7 @@ const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.C
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => import("./pages/Terms").then((m) => ({ default: m.Terms })));
 const SmsTerms = Terms;
+const Team = lazy(() => import("./pages/Team").then((m) => ({ default: m.Team })));
 const Pricing = lazy(() => import("./pages/Pricing").then((m) => ({ default: m.Pricing })));
 const ThankYou = lazy(() => import("./pages/ThankYou").then((m) => ({ default: m.ThankYou })));
 const Landing = lazy(() => import("./pages/Landing").then((m) => ({ default: m.Landing })));
@@ -39,6 +40,7 @@ export function AppRoutes() {
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/team" element={<Team />} />
           <Route path="/services" element={<Services />} />
           <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/why-philippines" element={<WhyPhilippines />} />

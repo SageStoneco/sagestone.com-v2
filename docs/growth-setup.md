@@ -52,4 +52,5 @@ have a logo-only header and an inline form. Edit or add pages in
 - **Guarantee:** set `guarantee` in the same file to the exact agreed policy. Nothing shows while it's `null`.
 - **Testimonials:** add real, approved quotes to `testimonials` in `src/app/content/site.ts`. The section is hidden while the list is empty.
 - **Case studies:** add entries to `caseStudies` in the same file.
+- **Team:** add people to `team` in `src/app/content/team.ts` (photos in `public/team/`). Leadership and talent sections appear once they have entries.
 - **Business address:** replace "Remote-first · Global" in the footer once a public address is chosen.

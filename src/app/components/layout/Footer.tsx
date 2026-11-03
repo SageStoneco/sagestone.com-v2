@@ -9,6 +9,7 @@ import { FOUNDER } from "../../content/founder";
 
 const companyLinks = [
   { label: "About", to: "/about" },
+  { label: "Our Team", to: "/team" },
   { label: "How It Works", to: "/how-it-works" },
   { label: "Pricing", to: "/pricing" },
   { label: "Case Studies", to: "/case-studies" },

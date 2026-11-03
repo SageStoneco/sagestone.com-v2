@@ -5,6 +5,7 @@ import { solutionPages } from "./solutions";
 import { FOUNDER } from "./founder";
 import { pricingFaqs } from "./pricing";
 import { landingPages } from "./landing";
+import { team } from "./team";
 
 /* ---------- Per-route <head> metadata ----------
  * Single source of truth for titles, descriptions, canonicals, social tags,
@@ -290,6 +291,28 @@ export const routeMeta: RouteMeta[] = [
     priority: 0.6,
     breadcrumbs: [{ name: "FAQ", path: "/faq" }],
     jsonLd: [faqPage([...pricingFaqs, ...faqs])],
+  },
+  {
+    path: "/team",
+    title: "Our Team | SageStone",
+    description:
+      "Meet SageStone's founder and team: the people who match, onboard and oversee dedicated support talent in the Philippines for U.S. businesses.",
+    priority: 0.6,
+    breadcrumbs: [
+      { name: "About", path: "/about" },
+      { name: "Team", path: "/team" },
+    ],
+    jsonLd: [
+      {
+        "@type": "AboutPage",
+        url: url("/team"),
+        about: orgRef,
+        mentions: [
+          founderRef,
+          ...team.map((m) => ({ "@type": "Person", name: m.name, jobTitle: m.role, worksFor: orgRef, ...(m.linkedin ? { sameAs: [m.linkedin] } : {}) })),
+        ],
+      },
+    ],
   },
   {
     path: "/pricing",
