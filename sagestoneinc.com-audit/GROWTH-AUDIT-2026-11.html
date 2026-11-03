@@ -1,0 +1,583 @@
+<title>SageStone Growth Audit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: brand-led report — cairn hero, sticky icon index, severity-striped findings, inline diagrams drawn from measured data. SageStone brand tokens. */
+:root{
+  --bg:#F5F1E8; --surface:#FBF9F4; --sunk:#EDE7DA; --fg:#222622; --muted:#5E655C; --line:#DED8CB;
+  --accent:#59634F; --sage:#7E8A77; --sage-soft:#C9D0C1; --gold:#7E6636; --gold-soft:#D9C9A6;
+  --crit:#A3402E; --high:#9A6A12; --med:#4F6B7A; --ok:#4E6B46;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#171B18; --surface:#1E2420; --sunk:#252C27; --fg:#EEE9E0; --muted:#A9B0A4; --line:#333B35;
+  --accent:#A9B7A0; --sage:#8E9B86; --sage-soft:#3B463D; --gold:#CDB68A; --gold-soft:#5A4D33;
+  --crit:#E08A76; --high:#D9AE5B; --med:#8FB0C2; --ok:#9CC28F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171B18; --surface:#1E2420; --sunk:#252C27; --fg:#EEE9E0; --muted:#A9B0A4; --line:#333B35;
+  --accent:#A9B7A0; --sage:#8E9B86; --sage-soft:#3B463D; --gold:#CDB68A; --gold-soft:#5A4D33;
+  --crit:#E08A76; --high:#D9AE5B; --med:#8FB0C2; --ok:#9CC28F; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--body)}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+a{color:var(--accent)}
+code{font-size:.86em;background:var(--sunk);padding:1px 6px;border-radius:4px;word-break:break-word}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.15;margin:0}
+p,li{max-width:68ch}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:radial-gradient(900px 420px at 85% 30%,color-mix(in srgb,var(--sage) 22%,transparent),transparent 70%),
+             radial-gradient(600px 300px at 10% 110%,color-mix(in srgb,var(--gold-soft) 45%,transparent),transparent 70%),var(--bg)}
+.hero-in{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:56px 48px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.eyebrow::before{content:"";width:28px;height:1px;background:currentColor}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);letter-spacing:-.025em;margin-top:14px}
+.hero h1 em{font-style:normal;color:var(--sage)}
+.lede{font-size:1.12rem;color:var(--muted);margin-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:.84rem;padding:6px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.chip .ico{width:15px;height:15px;color:var(--accent)}
+.chip b{color:var(--fg);font-weight:600}
+.cairn{width:100%;max-width:380px;justify-self:center;overflow:visible}
+.stone{transform-box:fill-box;transform-origin:center}
+.cairn .shadow{fill:color-mix(in srgb,var(--fg) 10%,transparent)}
+.cairn .ring{fill:none;stroke:var(--gold);stroke-width:1;stroke-dasharray:3 6;opacity:.6}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:56px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:.86rem;display:grid;gap:2px}
+nav.toc a{display:flex;align-items:center;gap:10px;color:var(--muted);text-decoration:none;padding:7px 10px;border-radius:8px;transition:background .2s,color .2s}
+nav.toc a .ico{width:16px;height:16px}
+nav.toc a:hover,nav.toc a:focus-visible,nav.toc a.on{color:var(--fg);background:var(--surface);outline:none}
+nav.toc a.on .ico{color:var(--accent)}
+main{min-width:0}
+section{scroll-margin-top:24px}
+.sh{display:flex;align-items:center;gap:14px;margin-top:72px;padding-top:28px;border-top:1px solid var(--line)}
+section:first-child .sh{margin-top:0;border-top:0;padding-top:0}
+.badge{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--accent);flex:none;transition:transform .4s var(--ease)}
+.badge .ico{width:22px;height:22px}
+.sh:hover .badge{transform:rotate(-6deg) scale(1.06)}
+.sh h2{font-size:1.9rem}
+.sh small{display:block;font-family:var(--body);font-size:.78rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+h3{font-size:1.2rem;margin-top:32px}
+
+/* ---------- score gauges ---------- */
+.score{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
+.g{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:center;transition:transform .3s var(--ease),box-shadow .3s}
+.g:hover{transform:translateY(-3px);box-shadow:0 10px 30px -18px color-mix(in srgb,var(--fg) 50%,transparent)}
+.g svg{width:76px;height:76px}
+.g .trk{fill:none;stroke:var(--sunk);stroke-width:7}
+.g .arc{fill:none;stroke-width:7;stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:calc(213.6 * (1 - var(--p)));transform:rotate(-90deg);transform-origin:50% 50%}
+.g text{font-family:var(--display);font-size:22px;font-weight:600;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.g .k{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.g .n{font-size:.9rem;margin-top:2px}
+.c-c{stroke:var(--crit)}.c-h{stroke:var(--high)}.c-m{stroke:var(--med)}.c-o{stroke:var(--ok)}
+.cap{font-size:.8rem;color:var(--muted);margin-top:10px}
+
+/* ---------- findings ---------- */
+.f{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:12px;max-width:none}
+.f li{max-width:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px 16px 20px;position:relative;overflow:hidden;transition:transform .3s var(--ease),border-color .3s}
+.f li::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--med)}
+.f li.crit::before{background:var(--crit)}.f li.high::before{background:var(--high)}.f li.ok::before{background:var(--ok)}
+.f li:hover{transform:translateX(4px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.f .t{font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.f .t .ico{width:18px;height:18px}
+.crit .t .ico{color:var(--crit)}.high .t .ico{color:var(--high)}.med .t .ico{color:var(--med)}.ok .t .ico{color:var(--ok)}
+.pill{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.crit .pill{color:var(--crit)}.high .pill{color:var(--high)}.med .pill{color:var(--med)}.ok .pill{color:var(--ok)}
+.f p{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.f p.fix{color:var(--fg);display:flex;gap:8px;align-items:flex-start}
+.f p.fix .ico{width:16px;height:16px;color:var(--accent);margin-top:4px}
+
+/* ---------- tables ---------- */
+.tbl{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:620px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--display);font-size:1.05rem;color:var(--gold);font-variant-numeric:tabular-nums}
+.lvl{display:inline-flex;gap:3px;vertical-align:middle}
+.lvl i{width:8px;height:8px;border-radius:2px;background:var(--sunk)}
+.lvl i.on{background:var(--sage)}
+.tag{display:inline-block;font-size:.76rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);margin:1px 2px 1px 0;white-space:nowrap}
+
+/* ---------- journey diagram ---------- */
+.journey{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:22px}
+.row-l{font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;display:flex;align-items:center;gap:8px}
+.row-l.now{color:var(--crit)}.row-l.next{color:var(--ok)}
+.steps{position:relative;display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.step{flex:1 1 120px;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.86rem;display:flex;gap:8px;align-items:flex-start;position:relative;z-index:1}
+.step .ico{width:16px;height:16px;margin-top:3px;color:var(--accent)}
+.step.wait{border-style:dashed;border-color:var(--crit);color:var(--crit)}
+.step.wait .ico{color:var(--crit)}
+.step small{display:block;color:var(--muted);font-size:.76rem}
+.track{height:3px;border-radius:3px;background:var(--sunk);margin-top:12px;position:relative;overflow:hidden}
+.track i{position:absolute;top:0;left:0;height:100%;width:60px;border-radius:3px}
+.now-track i{background:var(--crit)}
+.next-track i{background:var(--ok)}
+
+/* ---------- bar charts ---------- */
+.chart{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:grid;gap:10px}
+.chart h4{margin:0;font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.bar{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:12px;align-items:center;font-size:.86rem}
+.bar .lab{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .bg{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.bar .fg{height:100%;width:var(--w);border-radius:6px;background:var(--sage);transform-origin:left}
+.bar .fg.warn{background:var(--high)}
+.bar .val{font-variant-numeric:tabular-nums;text-align:right}
+.legend{display:flex;gap:16px;font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;background:var(--sage)}
+.legend i.warn{background:var(--high)}
+
+/* ---------- tracking stack ---------- */
+.stack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.tagc{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:.9rem}
+.tagc .st{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
+.tagc .st .ico{width:14px;height:14px;stroke-width:2.4}
+.tagc.no .st{background:color-mix(in srgb,var(--crit) 15%,transparent);color:var(--crit)}
+.tagc.yes .st{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.tagc small{display:block;color:var(--muted);font-size:.76rem}
+
+/* ---------- contrast + phone ---------- */
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
+.panel h4{margin:0;font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.btnrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fakebtn{font:500 .92rem var(--body);padding:10px 18px;border-radius:99px;color:#FAF8F4}
+.ratio{font-family:var(--display);font-size:1.15rem;display:flex;align-items:center;gap:6px}
+.ratio.bad{color:var(--crit)}.ratio.good{color:var(--ok)}
+.ratio .ico{width:16px;height:16px}
+.phone{width:100%;max-width:320px}
+.phone .frame{fill:var(--bg);stroke:var(--muted);stroke-width:1.5}
+.phone .el{fill:var(--sunk)}
+.phone .cta{fill:var(--sage)}
+.phone .over{fill:none;stroke:var(--crit);stroke-width:2}
+.phone .edge{stroke:var(--crit);stroke-dasharray:4 4;stroke-width:1.5}
+.phone text{font:600 10px var(--body);fill:var(--crit)}
+
+/* ---------- wireframe ---------- */
+.wf{display:grid;gap:8px;margin-top:18px}
+.wf div{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;transition:transform .3s var(--ease)}
+.wf div:hover{transform:translateX(6px)}
+.wf .wi{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--sage) 16%,transparent);color:var(--accent)}
+.wf .wi .ico{width:19px;height:19px}
+.wf p{margin:0}
+.wf b{font-weight:600}.wf span{color:var(--muted);font-size:.92rem;display:block}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0}
+.card h3{margin-top:0;font-size:1.05rem;display:flex;align-items:center;gap:8px}
+.card h3 .ico{color:var(--accent)}
+.card ul{padding-left:0;list-style:none;margin:10px 0 0;font-size:.92rem;display:grid;gap:6px}
+.card li{display:flex;gap:8px;align-items:flex-start}
+.card li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--sage);margin-top:9px;flex:none}
+
+/* ---------- roadmap timeline ---------- */
+.tl{position:relative;margin-top:22px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tl::before{content:"";position:absolute;left:0;right:0;top:18px;height:2px;background:linear-gradient(90deg,var(--crit),var(--high),var(--ok));opacity:.5}
+.ph{position:relative;padding-top:44px;min-width:0}
+.ph .dot{position:absolute;top:8px;left:18px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:3px solid var(--c);display:grid;place-items:center}
+.ph .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.ph .card{border-top:3px solid var(--c)}
+.ph .when{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c);font-weight:700}
+
+.note{font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:64px;padding-top:16px;display:flex;gap:10px}
+.note .ico{width:16px;height:16px;margin-top:3px}
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .hero-copy>*{animation:rise .8s var(--ease) both}
+  .hero-copy>*:nth-child(2){animation-delay:.08s}.hero-copy>*:nth-child(3){animation-delay:.16s}.hero-copy>*:nth-child(4){animation-delay:.24s}
+  @keyframes rise{from{transform:translateY(16px)}to{transform:none}}
+  .stone{animation:drop .9s var(--ease) both, bob 6s ease-in-out 1.2s infinite}
+  .s2{animation-delay:.12s,1.4s}.s3{animation-delay:.24s,1.6s}.s4{animation-delay:.36s,1.8s}.s5{animation-delay:.48s,2s}
+  @keyframes drop{from{transform:translateY(-60px)}60%{transform:translateY(4px)}to{transform:none}}
+  @keyframes bob{0%,100%{transform:none}50%{transform:translateY(-4px) rotate(.6deg)}}
+  .cairn .ring{animation:spin 40s linear infinite;transform-origin:50% 50%;transform-box:fill-box}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .g .arc{animation:arc 1.4s var(--ease) .3s both}
+  @keyframes arc{from{stroke-dashoffset:213.6}}
+  .track i{animation:travel 3.2s ease-in-out infinite}
+  .now-track i{animation-duration:6s}
+  @keyframes travel{from{left:-60px}to{left:100%}}
+  @supports (animation-timeline:view()){
+    .rv{animation:reveal linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
+    @keyframes reveal{from{opacity:.25;transform:translateY(28px) scale(.985)}to{opacity:1;transform:none}}
+    .bar .fg{animation:grow linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+    @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  }
+}
+@media (max-width:860px){
+  .hero-in{grid-template-columns:minmax(0,1fr)}
+  .cairn{max-width:240px;order:-1}
+  .wrap{grid-template-columns:minmax(0,1fr);gap:24px}
+  nav.toc{display:none}
+  .score,.cols,.stack,.duo,.tl{grid-template-columns:minmax(0,1fr)}
+  .tl::before{display:none}
+  .bar{grid-template-columns:minmax(0,1fr) auto;row-gap:4px}
+  .bar .lab{grid-column:1/-1;white-space:normal}
+}
+@media (min-width:861px) and (max-width:1020px){.score,.stack{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M19 3v3M17.5 4.5h3M5 18v3M3.5 19.5h3"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></symbol>
+  <symbol id="i-mega" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+  <symbol id="i-head" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-form" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-cursor" viewBox="0 0 24 24"><path d="m4 4 7 17 2.5-7.5L21 11z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5H3v8h4c0 4-2 5-4 5zM14 21c3 0 7-1 7-8V5h-7v8h4c0 4-2 5-4 5z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-steps" viewBox="0 0 24 24"><path d="M3 20h5v-5h5v-5h5V5h3"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8z"/></symbol>
+</svg>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <span class="eyebrow">Website audit · sagestoneinc.com</span>
+      <h1>SageStone <em>Growth</em> Audit</h1>
+      <p class="lede">A review of www.sagestoneinc.com covering marketing, sales, support, paid media and design, with specific fixes and a redesign plan for the pages that matter most for booking discovery calls.</p>
+      <div class="chips">
+        <span class="chip"><svg class="ico"><use href="#i-cal"/></svg><b>3 Nov 2026</b></span>
+        <span class="chip"><svg class="ico"><use href="#i-file"/></svg><b>42</b> pages crawled</span>
+        <span class="chip"><svg class="ico"><use href="#i-gauge"/></svg>Desktop + 390px phone</span>
+        <span class="chip"><svg class="ico"><use href="#i-wrench"/></svg>Source reviewed</span>
+      </div>
+    </div>
+    <svg class="cairn" viewBox="0 0 300 300" role="img" aria-label="A stacked stone cairn, the SageStone motif">
+      <circle class="ring" cx="150" cy="150" r="132"/>
+      <ellipse class="shadow" cx="150" cy="262" rx="104" ry="10"/>
+      <g class="stone s1"><ellipse cx="150" cy="236" rx="96" ry="26" fill="var(--accent)"/><ellipse cx="136" cy="228" rx="54" ry="8" fill="#fff" opacity=".08"/></g>
+      <g class="stone s2"><ellipse cx="146" cy="190" rx="74" ry="23" fill="var(--sage)"/><ellipse cx="132" cy="183" rx="38" ry="6" fill="#fff" opacity=".12"/></g>
+      <g class="stone s3"><ellipse cx="156" cy="149" rx="56" ry="20" fill="var(--gold-soft)"/><ellipse cx="146" cy="143" rx="28" ry="5" fill="#fff" opacity=".18"/></g>
+      <g class="stone s4"><ellipse cx="148" cy="113" rx="40" ry="17" fill="var(--sage-soft)"/><ellipse cx="140" cy="108" rx="18" ry="4" fill="#fff" opacity=".2"/></g>
+      <g class="stone s5"><ellipse cx="153" cy="82" rx="24" ry="13" fill="var(--gold)"/></g>
+    </svg>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <a href="#summary"><svg class="ico"><use href="#i-star"/></svg>Summary</a>
+  <a href="#priorities"><svg class="ico"><use href="#i-list"/></svg>Top 10 priorities</a>
+  <a href="#marketing"><svg class="ico"><use href="#i-mega"/></svg>Marketing</a>
+  <a href="#sales"><svg class="ico"><use href="#i-trend"/></svg>Sales</a>
+  <a href="#support"><svg class="ico"><use href="#i-head"/></svg>Support</a>
+  <a href="#paid"><svg class="ico"><use href="#i-target"/></svg>Paid media</a>
+  <a href="#redesign"><svg class="ico"><use href="#i-layout"/></svg>Redesign</a>
+  <a href="#technical"><svg class="ico"><use href="#i-gauge"/></svg>Technical &amp; UX</a>
+  <a href="#roadmap"><svg class="ico"><use href="#i-cal"/></svg>90-day roadmap</a>
+  <a href="#kpis"><svg class="ico"><use href="#i-chart"/></svg>KPIs</a>
+</nav>
+
+<main>
+<section id="summary">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-star"/></svg></span><h2><small>Overview</small>Summary</h2></div>
+<p style="margin-top:18px">Search visibility is fixed since the July audit. The site now prerenders every page, has unique titles and descriptions, a sitemap, schema on 39 of 42 pages, nine long-form blog posts, and SEO landing pages for industries and solutions. That foundation is good.</p>
+<p>The gaps are now commercial. Nothing on the site tracks a conversion, so paid media cannot be run or measured. "Book a Call" opens a form rather than a calendar, which adds up to a day before anyone talks. The homepage and case studies still use testimonials and stats that cannot be verified, and the site gives buyers no price signal in a category where prices are usually published.</p>
+<div class="score" role="list">
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-o" cx="40" cy="40" r="34" style="--p:.8"/><text x="40" y="41">B+</text></svg><div><div class="k">SEO foundation</div><div class="n">Indexable, prerendered, schema in place</div></div></div>
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-h" cx="40" cy="40" r="34" style="--p:.4"/><text x="40" y="41">C</text></svg><div><div class="k">Marketing &amp; proof</div><div class="n">Strong copy, unverifiable proof</div></div></div>
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-h" cx="40" cy="40" r="34" style="--p:.3"/><text x="40" y="41">C−</text></svg><div><div class="k">Sales conversion</div><div class="n">Form-only, no pricing, no qualification</div></div></div>
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-h" cx="40" cy="40" r="34" style="--p:.3"/><text x="40" y="41">C−</text></svg><div><div class="k">Support experience</div><div class="n">Thin FAQ, no chat, no client path</div></div></div>
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-c" cx="40" cy="40" r="34" style="--p:.1"/><text x="40" y="41">F</text></svg><div><div class="k">Paid media readiness</div><div class="n">No pixels, no conversion events</div></div></div>
+  <div class="g rv" role="listitem"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="trk" cx="40" cy="40" r="34"/><circle class="arc c-m" cx="40" cy="40" r="34" style="--p:.6"/><text x="40" y="41">B−</text></svg><div><div class="k">Design &amp; UX</div><div class="n">Calm brand; mobile nav and contrast bugs</div></div></div>
+</div>
+<p class="cap">Each ring shows the grade's position on a ten-step scale from F to A.</p>
+</section>
+
+<section id="priorities">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-list"/></svg></span><h2><small>Do these first</small>Top 10 priorities</h2></div>
+<div class="tbl rv"><table>
+<thead><tr><th>#</th><th>Action</th><th>Team</th><th>Effort</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td class="num">01</td><td>Remove or replace the three unverifiable testimonials and the 98% / 150+ stats</td><td><span class="tag">Marketing</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Trust, legal risk</td></tr>
+<tr><td class="num">02</td><td>Install GA4 via GTM, a <code>generate_lead</code> event and a <code>/contact/thank-you</code> URL</td><td><span class="tag">Paid media</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Unblocks all ads</td></tr>
+<tr><td class="num">03</td><td>Put a live scheduler on the contact page and in the confirmation email</td><td><span class="tag">Sales</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Faster first call</td></tr>
+<tr><td class="num">04</td><td>Fix the clipped mobile menu button and the 3.4:1 CTA contrast</td><td><span class="tag">Design</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Mobile conversion</td></tr>
+<tr><td class="num">05</td><td>Publish a pricing page with starting rates or engagement tiers</td><td><span class="tag">Sales</span></td><td><span class="lvl" aria-label="Medium"><i class="on"></i><i class="on"></i><i></i></span></td><td>Lead quality</td></tr>
+<tr><td class="num">06</td><td>Capture UTMs and referrer with every form submission and send leads to a CRM</td><td><span class="tag">Sales</span><span class="tag">Paid</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Attribution</td></tr>
+<tr><td class="num">07</td><td>Add Meta Pixel and LinkedIn Insight Tag for retargeting audiences</td><td><span class="tag">Paid media</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Remarketing pool</td></tr>
+<tr><td class="num">08</td><td>Write two real VA or support case studies with named clients</td><td><span class="tag">Marketing</span></td><td><span class="lvl" aria-label="Medium"><i class="on"></i><i class="on"></i><i></i></span></td><td>Proof</td></tr>
+<tr><td class="num">09</td><td>Expand the FAQ to cover pricing, contracts, replacements, security and time zones</td><td><span class="tag">Support</span></td><td><span class="lvl" aria-label="Low"><i class="on"></i><i></i><i></i></span></td><td>Fewer objections</td></tr>
+<tr><td class="num">10</td><td>Build two paid landing pages with no main nav and one CTA</td><td><span class="tag">Paid media</span></td><td><span class="lvl" aria-label="Medium"><i class="on"></i><i class="on"></i><i></i></span></td><td>Ad conversion rate</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="marketing">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-mega"/></svg></span><h2><small>Proof &amp; positioning</small>Marketing</h2></div>
+<ul class="f">
+<li class="crit rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">Critical</span>Testimonials look fabricated</div>
+<p>"Elena Marsh, Northline Studio", "David Okafor, Meridian Commerce" and "Priya Nair, Cedar &amp; Co." appear on the homepage and the case studies page. The July audit flagged them as invented, and they are still in <code>src/app/content/site.ts</code>. The FTC's 2024 rule on consumer reviews and testimonials prohibits fake testimonials, so this is a legal risk as well as a trust problem.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Remove them now. Replace them with real quotes (first name, role, company, and a LinkedIn link where the client agrees) or a single founder note until real quotes exist.</span></p></li>
+<li class="crit rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">Critical</span>Stats can't be verified and contradict each other</div>
+<p>"98% client retention" and "150+ growth-focused teams supported" show on the homepage and About page with no source. "24h average onboarding start" sits next to "24–72 hours" on How It Works and in the FAQ.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Use only numbers you can back up from your own records, and state the window once ("onboarding starts within 72 hours"). If the client count is small, show named logos instead of a count.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-flag"/></svg><span class="pill">High</span>Three of four case studies are anonymous outcomes</div>
+<p>"Creative Agency: 31% more billable capacity", "E-commerce: response time cut in half" and "Professional Services: cycle time reduced 22%" have no client name and no detail page. The one full case study, Kuha, shows go-to-market and content work rather than the VA and support services the site sells.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Write two case studies on core services using the Kuha page template: client, starting problem, the role placed, the first 30 days, a metric, and a quote.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-flag"/></svg><span class="pill">High</span>The Philippines advantage is hidden</div>
+<p>The homepage H1 ("Structured support for businesses built to grow.") and the hero copy never mention the Philippines, cost, or the time-zone overlap. Those are the main reasons a U.S. buyer is looking at this category. The word appears only in the nav.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Make the hero say who, what and why in one line, for example "Dedicated Filipino assistants and support staff for U.S. teams, working your hours from day one."</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Book a call is the only conversion</div>
+<p>Nine blog posts with 1,000 to 1,250 words each draw informational traffic, but there is no email capture, checklist download or newsletter. Readers who are not ready to book leave without a way to come back.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add one lead magnet tied to the existing posts, such as a "Delegation Task List" PDF or a "VA onboarding checklist", and nurture with a five-email sequence.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>The brand name is written two ways</div>
+<p>The privacy policy, SMS terms, SMS consent text, footer logo text and those pages' titles use "Sage Stone". Everywhere else the site uses "SageStone".</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Standardize on "SageStone" in display text, and use "SageStone Inc." for legal entity references.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Homepage has no Organization schema; two titles are thin</div>
+<p>The homepage is the only content page without JSON-LD. <code>/faq</code> has the title "FAQ | SageStone" (15 characters) and <code>/case-studies</code> has "Case Studies | SageStone" (24 characters). No <code>llms.txt</code> is published.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add Organization and WebSite JSON-LD with logo, sameAs links and contactPoint. Retitle the two pages, for example "Virtual Assistant &amp; Outsourcing FAQ | SageStone".</span></p></li>
+<li class="ok rv"><div class="t"><svg class="ico"><use href="#i-check"/></svg><span class="pill">Keep</span>What's working</div>
+<p>The voice is calm and specific. Service, industry and solution pages are keyword-led and interlinked, every URL in the sitemap returns 200, unknown URLs return a real 404, and the blog posts use BlogPosting schema.</p></li>
+</ul>
+</section>
+
+<section id="sales">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-trend"/></svg></span><h2><small>From visit to call</small>Sales</h2></div>
+
+<div class="journey rv" aria-label="Booking journey today compared with the proposed journey">
+  <div>
+    <div class="row-l now"><svg class="ico" style="width:16px;height:16px"><use href="#i-clock"/></svg>Today: up to a business day before a time is set</div>
+    <div class="steps">
+      <div class="step"><svg class="ico"><use href="#i-cursor"/></svg><div>Clicks "Book a Call"<small>Any page</small></div></div>
+      <div class="step"><svg class="ico"><use href="#i-form"/></svg><div>Fills 7-field form<small>/contact</small></div></div>
+      <div class="step wait"><svg class="ico"><use href="#i-clock"/></svg><div>Waits for a reply<small>"Within one business day"</small></div></div>
+      <div class="step wait"><svg class="ico"><use href="#i-mail"/></svg><div>Emails to pick a time<small>Back and forth</small></div></div>
+      <div class="step"><svg class="ico"><use href="#i-video"/></svg><div>Discovery call</div></div>
+    </div>
+    <div class="track now-track"><i></i></div>
+  </div>
+  <div>
+    <div class="row-l next"><svg class="ico" style="width:16px;height:16px"><use href="#i-check"/></svg>Proposed: time booked in the same visit</div>
+    <div class="steps">
+      <div class="step"><svg class="ico"><use href="#i-cursor"/></svg><div>Clicks "Book a Call"<small>Any page</small></div></div>
+      <div class="step"><svg class="ico"><use href="#i-form"/></svg><div>Short qualifying form<small>+ hours, start date</small></div></div>
+      <div class="step"><svg class="ico"><use href="#i-cal"/></svg><div>Picks a time<small>Cal.com, inline</small></div></div>
+      <div class="step"><svg class="ico"><use href="#i-video"/></svg><div>Discovery call</div></div>
+    </div>
+    <div class="track next-track"><i></i></div>
+  </div>
+</div>
+
+<ul class="f">
+<li class="crit rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">Critical</span>"Book a Call" doesn't book a call</div>
+<p>Every CTA leads to a seven-field form that promises a reply "within one business day". The buyer has to wait, then go back and forth over email to pick a time. Each step loses leads who were ready to talk.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>After the form is submitted, show a Cal.com booking page in place of the "Thank you" message and put the same link in the confirmation email. Keep the form fields so you still get context before the call.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-tag"/></svg><span class="pill">High</span>No pricing signal</div>
+<p>The site never mentions cost, hours, or engagement models. Buyers in this category compare hourly or monthly rates before they book anything. Without a range, price shoppers book calls that go nowhere and serious buyers leave to find a number elsewhere.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Publish a <code>/pricing</code> page with "from" pricing for part-time and full-time dedicated roles, what's included (SageStone oversight, replacement guarantee, onboarding), and the minimum commitment.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-form"/></svg><span class="pill">High</span>The form doesn't qualify leads</div>
+<p>The form asks for a service and a free-text message only. There is nothing on hours needed, start date or team size, so the first call has to cover the basics.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add two dropdowns: "Hours per week" (part-time, full-time, not sure) and "When do you need someone?" (this month, 1–3 months, exploring). Use the answers to route and prioritize.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-mail"/></svg><span class="pill">High</span>Leads go to an inbox only</div>
+<p><code>api/contact.js</code> sends a ZeptoMail notification and an auto-reply. It doesn't create a CRM record, store the source page or UTMs, or start a follow-up sequence.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Also post each submission to Zoho CRM (or Bigin) as a Lead, with the source URL, UTM fields and the qualifying answers. Set up a two-touch follow-up for leads who don't book within 24 hours.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-user"/></svg><span class="pill">Medium</span>No way to see the talent</div>
+<p>Rung one of the belief ladder in <code>PRODUCT.md</code> is "These are real, senior, dependable people." The site never shows one.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add three to six anonymized "sample talent" cards with first name, years of experience, tools, past roles, and a short intro video where possible. This is the single most persuasive asset in the VA category.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>No guarantee or risk reversal</div>
+<p>The site never says what happens if the match doesn't work out.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>State the replacement policy in plain words, for example "If the fit isn't right in the first 30 days, we rematch at no cost", and repeat it next to every CTA.</span></p></li>
+</ul>
+</section>
+
+<section id="support">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-head"/></svg></span><h2><small>Before and after the sale</small>Support</h2></div>
+<ul class="f">
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-head"/></svg><span class="pill">High</span>A support company with no support channel</div>
+<p>There is no chat, no help widget, and no published hours for the phone number +1 (214) 945-2234. For a company selling customer support outsourcing, the website itself is the first chance to show what good support feels like.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add a Tidio chat widget, staffed during U.S. business hours with an AI first-responder trained on the FAQ after hours. Show response hours next to the phone number.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-help"/></svg><span class="pill">High</span>The FAQ is thin</div>
+<p>The <code>/faq</code> page has about 390 words. It doesn't answer the questions buyers ask most: cost, contract length, minimum hours, what happens if the assistant leaves or is sick, time-zone coverage, data security and NDAs, how billing works, and whether there's a trial.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Grow it to 20–25 questions grouped by Pricing, Hiring and matching, Working together, and Security. Each answer also feeds FAQPage schema and AI search answers.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Existing clients have no path</div>
+<p>Nothing on the site tells an existing client how to raise an issue, reach their account manager, or request a change.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Add an "Existing client? Get help" link in the footer and on the contact page. It should point to a support email or form with a stated response time and an escalation contact.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>No business address</div>
+<p>The address shown is "Remote-first · Global". A registered business address builds trust with U.S. buyers, completes Organization schema, and is expected for SMS (10DLC) brand registration, which the site's SMS terms imply is in use.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Show the registered U.S. business address (or a virtual office) in the footer and on the contact page.</span></p></li>
+</ul>
+</section>
+
+<section id="paid">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-target"/></svg></span><h2><small>Tracking &amp; channels</small>Paid media</h2></div>
+<p style="margin-top:18px">The site can't run measurable ads in its current state. On every page tested, the only third-party hosts loaded were Google Fonts and Unsplash. The only analytics is Vercel Analytics, which counts page views but no conversions.</p>
+<div class="stack" role="list" aria-label="Tracking tags found on the site">
+  <div class="tagc no rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-x"/></svg></span><div>Google Tag Manager<small>Not installed</small></div></div>
+  <div class="tagc no rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-x"/></svg></span><div>Google Analytics 4<small>Not installed</small></div></div>
+  <div class="tagc no rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-x"/></svg></span><div>Google Ads tag<small>Not installed</small></div></div>
+  <div class="tagc no rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-x"/></svg></span><div>Meta Pixel / CAPI<small>Not installed</small></div></div>
+  <div class="tagc no rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-x"/></svg></span><div>LinkedIn Insight Tag<small>Not installed</small></div></div>
+  <div class="tagc yes rv" role="listitem"><span class="st"><svg class="ico"><use href="#i-check"/></svg></span><div>Vercel Analytics<small>Page views only</small></div></div>
+</div>
+<ul class="f">
+<li class="crit rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">Critical</span>No conversion tracking</div>
+<p>A form submission swaps in a "Thank you" message on the same URL, so there is no thank-you page to use as a goal, and no event fires.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Install GTM, then load GA4, the Google Ads tag, Meta Pixel and the LinkedIn Insight Tag through it, with a consent banner. Fire <code>generate_lead</code> on a successful submit and redirect to <code>/contact/thank-you</code>. Add Meta Conversions API from the Vercel function so the lead is still counted when browser tracking is blocked.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-layout"/></svg><span class="pill">High</span>No landing pages built for ads</div>
+<p>Every page carries the full header nav, seven nav links, and a footer with six link columns. Paid traffic needs one message and one action.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Build <code>/lp/hire-a-virtual-assistant</code> and <code>/lp/customer-support-outsourcing</code>, set to noindex: logo only, a headline that matches the ad, pricing from-rate, talent cards, one case study, the guarantee, and an inline form with a scheduler.</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-tag"/></svg><span class="pill">High</span>No lead source captured</div>
+<p>The form doesn't save UTMs, gclid, fbclid or the landing page URL, so a booked call can't be traced to the campaign that produced it.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Save UTMs and click IDs to sessionStorage on arrival, send them as hidden fields, and write them to the CRM lead.</span></p></li>
+</ul>
+<h3>Recommended channel plan, once tracking is live</h3>
+<div class="tbl rv"><table>
+<thead><tr><th>Channel</th><th>Role</th><th>Targeting</th><th>Offer</th></tr></thead>
+<tbody>
+<tr><td><b>Google Search</b></td><td><span class="tag">Primary</span></td><td>Exact and phrase match on "hire virtual assistant philippines", "outsourced customer support", "executive assistant services", "real estate virtual assistant"; negatives on jobs, salary, free, course</td><td>Discovery call with pricing shown on the page</td></tr>
+<tr><td><b>LinkedIn</b></td><td><span class="tag">Test</span></td><td>Founders, CEOs and COOs at 2–50 person U.S. companies in agencies, e-commerce, SaaS and real estate</td><td>"Delegation Task List" lead magnet, then retarget to a call</td></tr>
+<tr><td><b>Meta</b></td><td><span class="tag">Retargeting</span></td><td>Site visitors from the last 30 days and blog readers; exclude converted leads</td><td>Sample talent profiles, the case study, the guarantee</td></tr>
+<tr><td><b>Google remarketing</b></td><td><span class="tag">Retargeting</span></td><td>Visitors to /services, /pricing and /contact who didn't submit</td><td>"Meet your match in 72 hours"</td></tr>
+</tbody></table></div>
+<p>Start Google Search on one service (virtual assistant) with a single tightly matched landing page. Hold the other channels until there are at least 30 tracked leads to optimize against.</p>
+</section>
+
+<section id="redesign">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-layout"/></svg></span><h2><small>Structure, not a new look</small>Website redesign</h2></div>
+<p style="margin-top:18px">The visual identity (ivory, sage, Fraunces and Inter, generous space) fits the "safe pair of hands" positioning and should stay. The redesign is about page structure and proof.</p>
+<h3>Homepage, new section order</h3>
+<div class="wf">
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-star"/></svg></span><p><b>Hero that names the offer</b><span>"Dedicated Filipino assistants and support staff for U.S. teams." Subline: working your hours, matched in 72 hours, from $X/hr. Primary CTA "Book a discovery call", secondary "See pricing".</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-quote"/></svg></span><p><b>Proof strip</b><span>Real client logos or one named quote. Replaces the current 98% / 150+ stat block.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-user"/></svg></span><p><b>Meet the talent</b><span>Three sample talent cards with experience, tools and a short intro. Link to more profiles.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-grid"/></svg></span><p><b>What we take off your plate</b><span>The six services as a task list ("inbox triage, order refunds, CRM cleanup…") rather than six matching icon cards.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-steps"/></svg></span><p><b>How it works</b><span>Discovery, matching, onboarding, ongoing oversight, each with a timeframe.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-tag"/></svg></span><p><b>Pricing preview</b><span>Part-time and full-time starting rates, what's included, and the 30-day rematch guarantee.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-file"/></svg></span><p><b>One deep case study</b><span>A named client, the role placed, a before-and-after metric, and a quote.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-help"/></svg></span><p><b>Objection FAQ</b><span>Cost, contracts, security, time zones, what happens if someone leaves.</span></p></div>
+<div class="rv"><span class="wi"><svg class="ico"><use href="#i-cal"/></svg></span><p><b>Closing CTA with scheduler</b><span>The calendar embedded inline, so the visitor books without leaving the page.</span></p></div>
+</div>
+<h3>Other pages</h3>
+<div class="cols">
+<div class="card rv"><h3><svg class="ico"><use href="#i-mail"/></svg>Contact</h3><ul><li>Form plus the scheduler revealed on submit</li><li>Two qualifying dropdowns</li><li>Response hours, time zone and address</li><li>The guarantee next to the button</li></ul></div>
+<div class="card rv"><h3><svg class="ico"><use href="#i-grid"/></svg>Services</h3><ul><li>Example task list and the tools each role uses</li><li>A sample talent card for that role</li><li>A "from" price and a link to pricing</li><li>Your own team photos in place of Unsplash</li></ul></div>
+<div class="card rv"><h3><svg class="ico"><use href="#i-file"/></svg>New pages</h3><ul><li><code>/pricing</code></li><li><code>/talent</code> with sample profiles</li><li><code>/contact/thank-you</code></li><li>Two <code>/lp/</code> ad landing pages</li><li>A client support page</li></ul></div>
+</div>
+</section>
+
+<section id="technical">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-gauge"/></svg></span><h2><small>Measured in headless Chrome</small>Technical &amp; UX</h2></div>
+
+<div class="duo">
+  <div class="panel rv">
+    <h4>Primary button contrast</h4>
+    <div class="btnrow"><span class="fakebtn" style="background:#7E8A77">Book a Discovery Call</span><span class="ratio bad"><svg class="ico"><use href="#i-x"/></svg>3.42 : 1</span></div>
+    <div class="btnrow"><span class="fakebtn" style="background:#59634F">Book a Discovery Call</span><span class="ratio good"><svg class="ico"><use href="#i-check"/></svg>≈ 6 : 1</span></div>
+    <p class="cap" style="margin:0">Current sage (top) against the existing <code>--sage-ink</code> token (bottom). AA needs 4.5 : 1.</p>
+  </div>
+  <div class="panel rv">
+    <h4>Header at 390px width</h4>
+    <svg class="phone" viewBox="0 0 320 130" role="img" aria-label="Diagram of the phone header: the menu button extends 15 pixels past the right edge of a 390 pixel screen">
+      <rect class="frame" x="6" y="10" width="268" height="100" rx="14"/>
+      <rect class="el" x="20" y="30" width="22" height="26" rx="4"/>
+      <rect class="el" x="48" y="36" width="76" height="14" rx="3"/>
+      <circle class="el" cx="146" cy="43" r="14"/>
+      <rect class="cta" x="166" y="29" width="83" height="28" rx="14"/>
+      <rect class="over" x="252" y="29" width="28" height="28" rx="14"/>
+      <line class="edge" x1="274" y1="4" x2="274" y2="114"/>
+      <text x="206" y="84">390px edge</text>
+      <text x="240" y="126">+15px over</text>
+    </svg>
+    <p class="cap" style="margin:0">Logo, theme toggle, "Book a Call" and the menu button share one row. The menu button ends at 405px.</p>
+  </div>
+</div>
+
+<div class="chart rv" aria-label="Largest Contentful Paint by page and device">
+  <h4>Largest Contentful Paint (lab, ms)</h4>
+  <div class="bar"><span class="lab">Home · desktop</span><span class="bg"><span class="fg warn" style="--w:100%"></span></span><span class="val">2,504</span></div>
+  <div class="bar"><span class="lab">Home · phone</span><span class="bg"><span class="fg" style="--w:28.8%"></span></span><span class="val">720</span></div>
+  <div class="bar"><span class="lab">VA service · desktop</span><span class="bg"><span class="fg" style="--w:20.9%"></span></span><span class="val">524</span></div>
+  <div class="bar"><span class="lab">VA service · phone</span><span class="bg"><span class="fg" style="--w:19.5%"></span></span><span class="val">488</span></div>
+  <div class="bar"><span class="lab">Contact · desktop</span><span class="bg"><span class="fg" style="--w:20.1%"></span></span><span class="val">504</span></div>
+  <div class="bar"><span class="lab">Contact · phone</span><span class="bg"><span class="fg" style="--w:18.1%"></span></span><span class="val">452</span></div>
+  <div class="legend"><span><i></i>Under 2,500 ms (good)</span><span><i class="warn"></i>At the 2,500 ms threshold</span></div>
+</div>
+
+<div class="chart rv" aria-label="Font bytes downloaded per page load">
+  <h4>Font download per page (KB)</h4>
+  <div class="bar"><span class="lab">Desktop</span><span class="bg"><span class="fg" style="--w:14.6%"></span></span><span class="val">113</span></div>
+  <div class="bar"><span class="lab">Phone</span><span class="bg"><span class="fg warn" style="--w:100%"></span></span><span class="val">775</span></div>
+</div>
+
+<ul class="f">
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">High</span>Mobile menu button is cut off</div>
+<p>At 390px width (most current iPhones) the menu button runs 15px past the screen edge and is partly hidden.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Below 420px, move the theme toggle into the menu and shorten the header button to "Book".</span></p></li>
+<li class="high rv"><div class="t"><svg class="ico"><use href="#i-alert"/></svg><span class="pill">High</span>Primary CTA fails contrast</div>
+<p>Ivory text on sage measures 3.42:1. WCAG AA needs 4.5:1 for text of this size, and the product brief targets AA.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Use the existing <code>--sage-ink</code> (#59634F) as the button background. With ivory text it passes at about 6:1.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Layout shift and font weight on mobile</div>
+<p>The homepage on a phone measured CLS 0.109, just above the 0.1 "good" threshold, and downloaded nearly seven times the font data of desktop.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Self-host only the Fraunces weights you use as WOFF2 subsets, preload the display face, and set <code>size-adjust</code> fallbacks so text doesn't shift when the font loads.</span></p></li>
+<li class="med rv"><div class="t"><svg class="ico"><use href="#i-info"/></svg><span class="pill">Medium</span>Hotlinked stock images</div>
+<p>The service pages still load images from images.unsplash.com, and <code>site.ts</code> defines Unsplash stock portraits.</p>
+<p class="fix"><svg class="ico"><use href="#i-arrow"/></svg><span>Replace them with real team photos, self-hosted as WebP with width and height set.</span></p></li>
+<li class="ok rv"><div class="t"><svg class="ico"><use href="#i-check"/></svg><span class="pill">Good</span>Speed and hosting are fine</div>
+<p>HTTPS, HSTS, the apex-to-www redirect and the Vercel edge cache are all configured correctly. JavaScript is about 400 KB per page uncompressed, worth trimming but not urgent.</p></li>
+</ul>
+</section>
+
+<section id="roadmap">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-cal"/></svg></span><h2><small>Sequenced plan</small>90-day roadmap</h2></div>
+<div class="tl">
+<div class="ph rv" style="--c:var(--crit)"><span class="dot"></span><div class="card"><span class="when">Days 1–30</span><h3>Fix and measure</h3><ul><li>Remove the fake testimonials and stats</li><li>GTM, GA4, ad tags, consent banner</li><li>Thank-you page and lead event</li><li>UTM capture and CRM sync</li><li>Scheduler after the form</li><li>Mobile nav and contrast fixes</li><li>Organization schema and two titles</li></ul></div></div>
+<div class="ph rv" style="--c:var(--high)"><span class="dot"></span><div class="card"><span class="when">Days 31–60</span><h3>Build proof</h3><ul><li>Pricing page and guarantee</li><li>Talent profiles page</li><li>Two named case studies</li><li>FAQ expanded to 20+ questions</li><li>Chat widget and client support page</li><li>Homepage rebuilt in the new order</li></ul></div></div>
+<div class="ph rv" style="--c:var(--ok)"><span class="dot"></span><div class="card"><span class="when">Days 61–90</span><h3>Grow</h3><ul><li>Two paid landing pages</li><li>Google Search pilot on one service</li><li>Retargeting on Meta and Google</li><li>Lead magnet and five-email nurture</li><li>Two new blog posts a month</li><li>Monthly conversion review</li></ul></div></div>
+</div>
+</section>
+
+<section id="kpis">
+<div class="sh"><span class="badge"><svg class="ico"><use href="#i-chart"/></svg></span><h2><small>What to watch</small>KPIs to track</h2></div>
+<div class="tbl rv"><table>
+<thead><tr><th>Team</th><th>Metric</th><th>Where it comes from</th></tr></thead>
+<tbody>
+<tr><td><b>Marketing</b></td><td>Organic sessions, blog-to-contact click rate, lead magnet sign-ups</td><td>GA4, Search Console</td></tr>
+<tr><td><b>Sales</b></td><td>Form-to-booked-call rate, time to first call, call-to-client rate</td><td>CRM, Cal.com</td></tr>
+<tr><td><b>Support</b></td><td>Chat response time, FAQ views before contact, client issues resolved within SLA</td><td>Tidio, support inbox</td></tr>
+<tr><td><b>Paid media</b></td><td>Cost per lead, cost per booked call, cost per new client</td><td>Google Ads, Meta, LinkedIn, CRM</td></tr>
+<tr><td><b>Site</b></td><td>Contact page conversion rate, mobile vs desktop conversion, Core Web Vitals</td><td>GA4, Vercel Speed Insights</td></tr>
+</tbody></table></div>
+<p>No performance data (traffic, leads, ad spend) was available for this audit, so the KPIs have no baselines yet. Record the first 30 days after tracking goes live and use that as the baseline.</p>
+</section>
+
+<p class="note"><svg class="ico"><use href="#i-info"/></svg><span>Measurements come from headless Chrome on 3 Nov 2026, run once per page from a U.S. data center, and are lab figures rather than field data. The source review covered the <code>sagestone.com-v2</code> repository at commit e23a868a.</span></p>
+</main>
+</div>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  if(!('IntersectionObserver' in window)||!links.length)return;
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-30% 0px -60% 0px'});
+  document.querySelectorAll('main section[id]').forEach(function(s){io.observe(s)});
+})();
+</script>
