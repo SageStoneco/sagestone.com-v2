@@ -25,6 +25,7 @@ const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.C
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => import("./pages/Terms").then((m) => ({ default: m.Terms })));
 const SmsTerms = Terms;
+const DelegationPlaybook = lazy(() => import("./pages/DelegationPlaybook").then((m) => ({ default: m.DelegationPlaybook })));
 const Team = lazy(() => import("./pages/Team").then((m) => ({ default: m.Team })));
 const Pricing = lazy(() => import("./pages/Pricing").then((m) => ({ default: m.Pricing })));
 const ThankYou = lazy(() => import("./pages/ThankYou").then((m) => ({ default: m.ThankYou })));
@@ -49,6 +50,7 @@ export function AppRoutes() {
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/solutions/:slug" element={<SolutionDetail />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/delegation-playbook" element={<DelegationPlaybook />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/case-studies" element={<CaseStudies />} />

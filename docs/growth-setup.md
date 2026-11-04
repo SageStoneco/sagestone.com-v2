@@ -20,6 +20,8 @@ ones are read at build time).
 | `page_view` | Every route change (the site is a single-page app) | `page_path`, `page_title` |
 | `generate_lead` | The contact form was accepted by the server | `event_id`, `service`, `hours`, `timeline` |
 | `book_call_click` | "Choose a time" clicked on the thank-you page | `location` |
+| `lead_magnet_signup` | Delegation Playbook form accepted | `lead_magnet`, `marketing_opt_in` |
+| `lead_magnet_download` | "Download the PDF" clicked after signup | `lead_magnet` |
 
 Suggested GTM setup:
 
@@ -39,6 +41,12 @@ The thank-you page is a real URL, `/contact/thank-you`, so URL-based goals work 
 for the browser session. The contact form sends them with the inquiry; they appear
 in the notification email ("Source", "Landing page", "Campaign") and in the CRM
 webhook payload (`lead_source`, `utm_*`, click IDs).
+
+Use `generate_lead` (discovery-call requests) as the primary ad conversion, and `lead_magnet_signup` as a secondary one, so ad platforms don't optimize toward PDF downloads.
+
+## Delegation Playbook
+
+See `docs/delegation-playbook.md` for the lead magnet, the Zoho setup and the five follow-up emails.
 
 ## Paid landing pages
 

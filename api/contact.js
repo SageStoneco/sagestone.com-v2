@@ -26,15 +26,25 @@
 
 import { createHash } from "node:crypto";
 import { validateContact, COMPANY_MAX } from "../src/app/lib/contact-rules.js";
-
-const DEFAULT_API_URL = "https://api.zeptomail.com/v1.1/email";
-const DEFAULT_FROM = "noreply@sagestoneinc.com";
-const DEFAULT_TO = "hello@sagestoneinc.com";
-const MAX_BODY_BYTES = 20_000;
-
-// Browsers always send Origin on a cross-site POST. Refusing other origins
-// stops other sites from using this endpoint as a mail relay.
-const ALLOWED_ORIGIN = /^https:\/\/(www\.)?sagestoneinc\.com$|^https:\/\/sagestone-website-[a-z0-9-]+\.vercel\.app$|^http:\/\/localhost(:\d+)?$/;
+import {
+  DEFAULT_TO,
+  MAX_BODY_BYTES,
+  ALLOWED_ORIGIN,
+  SITE,
+  C,
+  cleanAttribution,
+  sourceLine,
+  mailer,
+  from,
+  bookingUrl,
+  heading,
+  button,
+  layout,
+  clean,
+  escapeHtml,
+  json,
+  postToCrm,
+} from "./_shared.js";
 
 export async function POST(request) {
   const origin = request.headers.get("origin");
@@ -115,56 +125,26 @@ export async function POST(request) {
   return json(200, { ok: true });
 }
 
-const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "gbraid", "wbraid", "fbclid", "li_fat_id", "msclkid", "landing_page", "referrer"];
-
-function cleanAttribution(value) {
-  const out = {};
-  if (!value || typeof value !== "object") return out;
-  for (const k of ATTRIBUTION_KEYS) {
-    const v = clean(value[k], 300);
-    if (v) out[k] = v;
-  }
-  return out;
-}
-
-function sourceLine(a) {
-  if (a.utm_source || a.utm_medium || a.utm_campaign) {
-    return [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean).join(" / ");
-  }
-  if (a.gclid || a.gbraid || a.wbraid) return "Google Ads (click ID)";
-  if (a.fbclid) return "Meta (click ID)";
-  if (a.li_fat_id) return "LinkedIn (click ID)";
-  if (a.referrer) return `Referral: ${a.referrer}`;
-  return "Direct / unknown";
-}
-
 async function sendToCrm(s) {
-  const url = process.env.CRM_WEBHOOK_URL?.trim();
-  if (!url) return;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: s.name,
-      first_name: s.name.split(/\s+/)[0],
-      last_name: s.name.split(/\s+/).slice(1).join(" "),
-      email: s.email,
-      phone: s.phone,
-      company: s.company,
-      service: s.service,
-      hours: s.hours,
-      timeline: s.timeline,
-      message: s.message,
-      sms_consent: s.smsConsent,
-      sms_consent_at: s.smsConsentAt,
-      lead_source: sourceLine(s.attribution),
-      ...s.attribution,
-      form_page: s.page,
-      received_at: s.receivedAt,
-    }),
-    signal: AbortSignal.timeout(8_000),
+  await postToCrm({
+    form: "contact",
+    name: s.name,
+    first_name: s.name.split(/\s+/)[0],
+    last_name: s.name.split(/\s+/).slice(1).join(" "),
+    email: s.email,
+    phone: s.phone,
+    company: s.company,
+    service: s.service,
+    hours: s.hours,
+    timeline: s.timeline,
+    message: s.message,
+    sms_consent: s.smsConsent,
+    sms_consent_at: s.smsConsentAt,
+    lead_source: sourceLine(s.attribution),
+    ...s.attribution,
+    form_page: s.page,
+    received_at: s.receivedAt,
   });
-  if (!res.ok) throw new Error(`CRM webhook ${res.status}`);
 }
 
 const sha256 = (v) => createHash("sha256").update(v).digest("hex");
@@ -200,29 +180,6 @@ async function sendMetaLead(s) {
     signal: AbortSignal.timeout(8_000),
   });
   if (!res.ok) throw new Error(`Meta CAPI ${res.status}: ${(await res.text()).slice(0, 300)}`);
-}
-
-function mailer(token) {
-  const url = process.env.ZEPTOMAIL_API_URL?.trim() || DEFAULT_API_URL;
-  // The ZeptoMail console shows the token with its "Zoho-enczapikey" prefix;
-  // accept it with or without.
-  const auth = /^Zoho-enczapikey\s/i.test(token) ? token : `Zoho-enczapikey ${token}`;
-
-  return async (message) => {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: auth },
-      body: JSON.stringify(message),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) {
-      throw new Error(`ZeptoMail ${res.status}: ${(await res.text()).slice(0, 500)}`);
-    }
-  };
-}
-
-function from(name) {
-  return { address: process.env.CONTACT_FROM?.trim() || DEFAULT_FROM, name };
 }
 
 function notification(s) {
@@ -338,85 +295,3 @@ function confirmation(s) {
   };
 }
 
-function bookingUrl() {
-  const u = (process.env.BOOKING_URL || process.env.VITE_BOOKING_URL || "").trim();
-  return /^https:\/\//.test(u) ? u : "";
-}
-
-// ---------- Branded email layout ----------
-
-const SITE = "https://www.sagestoneinc.com";
-const C = {
-  sage: "#7E8A77",
-  sageInk: "#59634F",
-  ivory: "#F5F1E8",
-  ink: "#222622",
-  muted: "#5E655C",
-  rule: "#E4E0D6",
-};
-const FONT = "Georgia,'Times New Roman',serif";
-const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,Helvetica,sans-serif";
-
-function heading(text) {
-  return `<h1 style="margin:0 0 20px;font-family:${FONT};font-size:26px;line-height:1.25;font-weight:600;color:${C.ink}">${text}</h1>`;
-}
-
-/** Table-based button: renders as a button in Outlook as well as web clients. */
-function button(href, label) {
-  return (
-    `<table role="presentation" cellpadding="0" cellspacing="0"><tr>` +
-    `<td style="border-radius:999px;background:${C.sageInk}">` +
-    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:12px 26px;font-family:${SANS};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px">${escapeHtml(label)}</a>` +
-    `</td></tr></table>`
-  );
-}
-
-/**
- * Shared shell for every email: ivory background, logo header, white card,
- * contact footer. Tables and inline styles only, because that's what Gmail,
- * Outlook and Apple Mail all render consistently. The logo is served from the
- * site (public/email/logo.png, generated by scripts/email/generate-email-assets.mjs).
- */
-function layout({ preheader, body }) {
-  return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>SageStone</title></head>
-<body style="margin:0;padding:0;background:${C.ivory}">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.ivory}"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px">
-<tr><td style="padding:0 8px 24px">
-<a href="${SITE}" style="text-decoration:none"><img src="${SITE}/email/logo.png" width="193" height="56" alt="SageStone" style="display:block;border:0;width:193px;height:56px"></a>
-</td></tr>
-<tr><td style="background:#ffffff;border:1px solid ${C.rule};border-top:4px solid ${C.sage};border-radius:12px;padding:36px 36px 32px;font-family:${SANS};color:${C.ink}">
-${body}
-</td></tr>
-<tr><td style="padding:24px 8px 0;font-family:${SANS};font-size:12px;line-height:1.6;color:${C.muted}">
-<strong style="color:${C.ink}">SageStone Inc.</strong> · Supporting Ambition<br>
-<a href="${SITE}" style="color:${C.sageInk};text-decoration:none;white-space:nowrap">sagestoneinc.com</a> ·
-<a href="mailto:${DEFAULT_TO}" style="color:${C.sageInk};text-decoration:none;white-space:nowrap">${DEFAULT_TO}</a> ·
-<a href="tel:+12149452234" style="color:${C.sageInk};text-decoration:none;white-space:nowrap">+1 (214) 945-2234</a>
-</td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
-}
-
-function clean(value, max) {
-  return typeof value === "string" ? value.trim().slice(0, max) : "";
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function json(status, body) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
-}

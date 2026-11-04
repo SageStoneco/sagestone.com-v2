@@ -293,6 +293,27 @@ export const routeMeta: RouteMeta[] = [
     jsonLd: [faqPage([...pricingFaqs, ...faqs])],
   },
   {
+    path: "/delegation-playbook",
+    title: "The Delegation Playbook: Free Guide | SageStone",
+    description:
+      "Free PDF for founders: 50 tasks you can hand off, an hours worksheet to size the help you need, and a four-week plan for onboarding an assistant.",
+    image: "/downloads/delegation-playbook-cover.webp",
+    priority: 0.7,
+    breadcrumbs: [{ name: "Delegation Playbook", path: "/delegation-playbook" }],
+    jsonLd: [
+      {
+        "@type": "DigitalDocument",
+        name: "The Delegation Playbook",
+        description: "50 tasks founders can hand off, an hours worksheet, and a four-week onboarding plan.",
+        url: url("/delegation-playbook"),
+        encodingFormat: "application/pdf",
+        isAccessibleForFree: true,
+        publisher: orgRef,
+        image: absolute("/downloads/delegation-playbook-cover.webp"),
+      },
+    ],
+  },
+  {
     path: "/team",
     title: "Our Team | SageStone",
     description:

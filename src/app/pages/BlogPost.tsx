@@ -8,6 +8,7 @@ import { postBySlug, relatedPosts, formatPostDate } from "../content/blog";
 import { serviceLinks } from "../content/links";
 import { FOUNDER } from "../content/founder";
 import { NotFound } from "./NotFound";
+import { PlaybookSignup } from "../components/growth/PlaybookSignup";
 
 /* Post bodies are separate chunks (see scripts/blog/plugin.ts). One lazy
  * component per slug, cached so re-renders don't re-suspend. The prerender
@@ -97,6 +98,10 @@ export function BlogPost() {
               <Suspense fallback={<div className="min-h-[60vh]" aria-hidden="true" />}>
                 <PostBody slug={post.slug} />
               </Suspense>
+            </div>
+
+            <div className="mx-auto mt-16 max-w-3xl">
+              <PlaybookSignup variant="card" />
             </div>
 
             {isFounder && (

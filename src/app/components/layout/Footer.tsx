@@ -21,6 +21,7 @@ const companyLinks = [
 
 const resourceLinks = [
   { label: "Blog", to: "/blog" },
+  { label: "Delegation Playbook", to: "/delegation-playbook" },
   { label: "Kuha Case Study", to: "/case-studies/kuha" },
   { label: "All Solutions", to: "/solutions" },
   { label: "All Industries", to: "/industries" },
