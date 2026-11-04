@@ -9,15 +9,19 @@ import { FOUNDER } from "../../content/founder";
 
 const companyLinks = [
   { label: "About", to: "/about" },
+  { label: "Our Team", to: "/team" },
   { label: "How It Works", to: "/how-it-works" },
+  { label: "Pricing", to: "/pricing" },
   { label: "Case Studies", to: "/case-studies" },
   { label: "Why the Philippines", to: "/why-philippines" },
   { label: "FAQ", to: "/faq" },
   { label: "Contact", to: "/contact" },
+  { label: "Client Support", to: "/contact#existing-clients" },
 ];
 
 const resourceLinks = [
   { label: "Blog", to: "/blog" },
+  { label: "Delegation Playbook", to: "/delegation-playbook" },
   { label: "Kuha Case Study", to: "/case-studies/kuha" },
   { label: "All Solutions", to: "/solutions" },
   { label: "All Industries", to: "/industries" },

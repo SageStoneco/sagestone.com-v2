@@ -14,6 +14,10 @@ export const COMPANY_MAX = 120;
 export const MESSAGE_MIN = 20;
 export const MESSAGE_MAX = 2000;
 
+/** Qualifying questions. Optional, but only these answers are accepted. */
+export const HOURS_OPTIONS = ["Part-time", "Full-time", "More than one person", "Not sure yet"];
+export const TIMELINE_OPTIONS = ["This month", "In 1–3 months", "Just exploring"];
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /**
@@ -55,6 +59,9 @@ export function validateContact(form) {
   if (!message) errors.message = "Please tell us a little about what you need.";
   else if (message.length < MESSAGE_MIN) errors.message = `Please add a bit more detail (at least ${MESSAGE_MIN} characters).`;
   else if (message.length > MESSAGE_MAX) errors.message = `Please keep your message under ${MESSAGE_MAX} characters.`;
+
+  if (str(form.hours) && !HOURS_OPTIONS.includes(str(form.hours))) errors.service = "Please choose an option from the list.";
+  if (str(form.timeline) && !TIMELINE_OPTIONS.includes(str(form.timeline))) errors.service = "Please choose an option from the list.";
 
   return errors;
 }

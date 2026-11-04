@@ -28,6 +28,7 @@ import {
   caseStudies,
 } from "../content/site";
 import { industryPages } from "../content/industries";
+import { PricingCards } from "../components/growth/PricingCards";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -46,18 +47,18 @@ export function Home() {
         <Container>
           <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
             <motion.div {...fadeUp}>
-              <Eyebrow>Remote Operations &amp; Virtual Assistant Services</Eyebrow>
+              <Eyebrow>Virtual Assistant &amp; Remote Operations Services</Eyebrow>
               <h1 className="mt-8 text-[2.65rem] leading-[1.0] tracking-[-0.03em] text-charcoal dark:text-chalk sm:text-[3.25rem] sm:leading-[0.98] md:text-[4.75rem]">
-                Structured support
-                <br className="hidden sm:block" /> for businesses{" "}
+                Dedicated Filipino
+                <br className="hidden sm:block" /> support talent{" "}
                 <br className="hidden sm:block" />
-                <span className="text-sage">built to grow.</span>
+                <span className="text-sage-ink dark:text-sage">for growing teams.</span>
               </h1>
               <p className="mt-7 max-w-lg text-[1.1rem] leading-relaxed text-slate-olive dark:text-muted-foreground sm:mt-9 sm:text-[1.2rem]">
-                SageStone provides dedicated virtual assistants, customer support
-                outsourcing, executive assistance, and remote operations support for
-                growing businesses — embedded in your workflows with the clarity,
-                precision, and calm your growth deserves.
+                SageStone matches U.S. businesses with dedicated virtual assistants,
+                customer support, executive assistance, and remote operations talent
+                in the Philippines. Onboarded within 24–72 hours of your discovery
+                call, and overseen by SageStone so quality holds as you grow.
               </p>
               <div className="mt-9 flex flex-col items-stretch gap-4 sm:mt-11 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
                 <Button to="/contact" size="lg" className="w-full sm:w-auto">
@@ -65,21 +66,21 @@ export function Home() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Link
-                  to="/services"
+                  to="/pricing"
                   className="group inline-flex items-center justify-center gap-2 text-[1rem] font-medium text-charcoal transition-colors hover:text-sage dark:text-chalk sm:justify-start"
                 >
-                  Explore our services
+                  See pricing
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
 
               {/* quiet, rule-divided proof (no boxed KPI card) */}
               <div className="mt-10 flex items-center gap-5 border-t border-border pt-8 sm:mt-12">
-                <span className="text-[2.75rem] leading-none text-charcoal dark:text-chalk" style={serif}>
-                  98<span className="text-sage">%</span>
+                <span className="text-[2.75rem] shrink-0 whitespace-nowrap leading-none text-charcoal dark:text-chalk" style={serif}>
+                  24–72<span className="text-sage-ink dark:text-sage">h</span>
                 </span>
                 <span className="max-w-[15rem] text-[0.92rem] leading-snug text-slate-olive dark:text-muted-foreground">
-                  Client retention — support relationships that last.
+                  From discovery call to onboarding, depending on scope.
                 </span>
               </div>
             </motion.div>
@@ -302,7 +303,7 @@ export function Home() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className={`mt-16 grid gap-8 ${caseStudies.length > 1 ? "md:grid-cols-2 lg:grid-cols-3" : "max-w-xl"}`}>
             {caseStudies.slice(0, 3).map((s, i) => (
               <motion.div key={s.slug} {...fadeUp} transition={{ ...fadeUp.transition, delay: i * 0.08 }}>
                 <CaseStudyCard study={s} />
@@ -312,7 +313,8 @@ export function Home() {
         </Container>
       </Section>
 
-      {/* ---------- Testimonials ---------- */}
+      {/* ---------- Testimonials (shown once real client quotes exist) ---------- */}
+      {testimonials.length > 0 && (
       <Section className="bg-cloud py-28 dark:bg-card md:py-40">
         <Container>
           <motion.div {...fadeUp}>
@@ -329,6 +331,29 @@ export function Home() {
               </motion.div>
             ))}
           </div>
+        </Container>
+      </Section>
+      )}
+
+      {/* ---------- Pricing preview ---------- */}
+      <Section className="border-t border-border py-28 md:py-40">
+        <Container>
+          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <motion.div {...fadeUp}>
+              <SectionHeader
+                eyebrow="Pricing"
+                title="Simple engagement models"
+                description="Part-time, full-time, or a small team. Every engagement includes matching, documented onboarding and ongoing SageStone oversight."
+              />
+            </motion.div>
+            <Link to="/pricing" className="group inline-flex shrink-0 items-center gap-2 font-medium text-sage-ink">
+              Pricing details
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+          <motion.div {...fadeUp} className="mt-16">
+            <PricingCards compact />
+          </motion.div>
         </Container>
       </Section>
 

@@ -8,8 +8,9 @@
  */
 
 import { validateContact as validate } from "./contact-rules.js";
+import { readAttribution, type Attribution } from "./attribution";
 
-export { FIELD_ORDER, MESSAGE_MAX, MESSAGE_MIN } from "./contact-rules.js";
+export { FIELD_ORDER, MESSAGE_MAX, MESSAGE_MIN, HOURS_OPTIONS, TIMELINE_OPTIONS } from "./contact-rules.js";
 
 export type ContactForm = {
   name: string;
@@ -17,6 +18,9 @@ export type ContactForm = {
   phone: string;
   company: string;
   service: string;
+  /** Optional qualifying answers. */
+  hours: string;
+  timeline: string;
   message: string;
   /** Optional. Never required to submit — consent cannot be a condition of contact. */
   smsConsent: boolean;
@@ -28,6 +32,9 @@ export type ContactPayload = ContactForm & {
   smsConsentSource: string | null;
   smsConsentAt: string | null;
   page: string;
+  attribution: Attribution;
+  /** Shared by the browser lead event and Meta Conversions API, so Meta counts the lead once. */
+  eventId: string;
 };
 
 export type ContactErrors = Partial<Record<"name" | "email" | "phone" | "service" | "message", string>>;
@@ -44,7 +51,17 @@ export function buildPayload(form: ContactForm): ContactPayload {
     smsConsentSource: form.smsConsent ? "web form" : null,
     smsConsentAt: form.smsConsent ? new Date().toISOString() : null,
     page: typeof window === "undefined" ? "" : window.location.pathname,
+    attribution: readAttribution(),
+    eventId: newEventId(),
   };
+}
+
+function newEventId() {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
 }
 
 /** The server has no ZeptoMail credentials configured. */
@@ -67,13 +84,14 @@ export class ContactSendError extends Error {
  * duplicate notifications. Failures are shown to the visitor instead, with
  * hello@sagestoneinc.com as the fallback.
  */
-export async function submitContact(form: ContactForm): Promise<void> {
+export async function submitContact(form: ContactForm): Promise<{ eventId: string }> {
+  const payload = buildPayload(form);
   const res = await fetch("/api/contact", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(buildPayload(form)),
+    body: JSON.stringify(payload),
   });
-  if (res.ok) return;
+  if (res.ok) return { eventId: payload.eventId };
 
   const data = (await res.json().catch(() => ({}))) as { error?: string; fields?: ContactErrors };
   if (data.error === "not_configured") {

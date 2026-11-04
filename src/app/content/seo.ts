@@ -3,6 +3,9 @@ import { services, serviceDetails, faqs } from "./site";
 import { industryPages } from "./industries";
 import { solutionPages } from "./solutions";
 import { FOUNDER } from "./founder";
+import { pricingFaqs } from "./pricing";
+import { landingPages } from "./landing";
+import { team } from "./team";
 
 /* ---------- Per-route <head> metadata ----------
  * Single source of truth for titles, descriptions, canonicals, social tags,
@@ -241,7 +244,7 @@ export const routeMeta: RouteMeta[] = [
   },
   {
     path: "/case-studies",
-    title: "Case Studies | SageStone",
+    title: "Client Results & Case Studies | SageStone",
     description:
       "How SageStone brings structure, systems, and dependable support to growth-focused teams and product launches, and the outcomes that follow.",
     priority: 0.7,
@@ -282,13 +285,79 @@ export const routeMeta: RouteMeta[] = [
   ...blogPostRoutes,
   {
     path: "/faq",
-    title: "FAQ | SageStone",
+    title: "Virtual Assistant & Outsourcing FAQ | SageStone",
     description:
-      "Answers about onboarding, matching, pricing, and working with SageStone's dedicated remote support team.",
+      "Answers about pricing, onboarding, matching, security, and working day to day with SageStone's dedicated remote support talent in the Philippines.",
     priority: 0.6,
     breadcrumbs: [{ name: "FAQ", path: "/faq" }],
-    jsonLd: [faqPage(faqs)],
+    jsonLd: [faqPage([...pricingFaqs, ...faqs])],
   },
+  {
+    path: "/delegation-playbook",
+    title: "The Delegation Playbook: Free Guide | SageStone",
+    description:
+      "Free PDF for founders: 50 tasks you can hand off, an hours worksheet to size the help you need, and a four-week plan for onboarding an assistant.",
+    image: "/downloads/delegation-playbook-cover.webp",
+    priority: 0.7,
+    breadcrumbs: [{ name: "Delegation Playbook", path: "/delegation-playbook" }],
+    jsonLd: [
+      {
+        "@type": "DigitalDocument",
+        name: "The Delegation Playbook",
+        description: "50 tasks founders can hand off, an hours worksheet, and a four-week onboarding plan.",
+        url: url("/delegation-playbook"),
+        encodingFormat: "application/pdf",
+        isAccessibleForFree: true,
+        publisher: orgRef,
+        image: absolute("/downloads/delegation-playbook-cover.webp"),
+      },
+    ],
+  },
+  {
+    path: "/team",
+    title: "Our Team | SageStone",
+    description:
+      "Meet SageStone's founder and team: the people who match, onboard and oversee dedicated support talent in the Philippines for U.S. businesses.",
+    priority: 0.6,
+    breadcrumbs: [
+      { name: "About", path: "/about" },
+      { name: "Team", path: "/team" },
+    ],
+    jsonLd: [
+      {
+        "@type": "AboutPage",
+        url: url("/team"),
+        about: orgRef,
+        mentions: [
+          founderRef,
+          ...team.map((m) => ({ "@type": "Person", name: m.name, jobTitle: m.role, worksFor: orgRef, ...(m.linkedin ? { sameAs: [m.linkedin] } : {}) })),
+        ],
+      },
+    ],
+  },
+  {
+    path: "/pricing",
+    title: "Pricing & Engagement Models | SageStone",
+    description:
+      "Part-time, full-time and team engagements with dedicated Filipino support talent. Matching, onboarding and SageStone oversight included in every plan.",
+    priority: 0.8,
+    breadcrumbs: [{ name: "Pricing", path: "/pricing" }],
+    jsonLd: [faqPage(pricingFaqs)],
+  },
+  {
+    path: "/contact/thank-you",
+    title: "Thank You | SageStone",
+    description: "Your inquiry has been received. Pick a time for your SageStone discovery call.",
+    noindex: true,
+  },
+  ...landingPages.map(
+    (l): RouteMeta => ({
+      path: `/lp/${l.slug}`,
+      title: l.title,
+      description: l.description,
+      noindex: true,
+    })
+  ),
   {
     path: "/contact",
     title: "Contact SageStone | Book a Discovery Call",

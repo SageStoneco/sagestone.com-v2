@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Container, Section, SectionHeader, Eyebrow } from "../components/ui-brand/primitives";
 import { CTABand, PageHero, NoiseOverlay } from "../components/ui-brand/components";
@@ -106,6 +107,9 @@ export function About() {
                 <a href={FOUNDER.linkedin} className="text-sage-ink underline decoration-gold/60 underline-offset-4 hover:text-sage">
                   LinkedIn
                 </a>
+                <Link to="/team" className="text-sage-ink underline decoration-gold/60 underline-offset-4 hover:text-sage">
+                  Meet the team
+                </Link>
               </div>
             </div>
           </div>
