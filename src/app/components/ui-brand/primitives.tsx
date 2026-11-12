@@ -102,7 +102,7 @@ const buttonBase =
 
 const buttonVariants: Record<string, string> = {
   primary:
-    "bg-sage text-cloud hover:bg-sage-deep shadow-sm hover:shadow-md dark:text-pine",
+    "bg-sage-ink text-cloud hover:bg-charcoal shadow-sm hover:shadow-md dark:text-pine dark:hover:bg-chalk",
   secondary:
     "border border-charcoal/20 text-charcoal hover:bg-charcoal hover:text-cloud dark:border-chalk/25 dark:text-chalk dark:hover:bg-chalk dark:hover:text-pine",
   ghost:

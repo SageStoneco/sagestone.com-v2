@@ -13,6 +13,7 @@ const nav = [
   { label: "Industries", to: "/industries" },
   { label: "Case Studies", to: "/case-studies" },
   { label: "Blog", to: "/blog" },
+  { label: "Pricing", to: "/pricing" },
   { label: "FAQ", to: "/faq" },
 ];
 
@@ -109,23 +110,29 @@ export function Header({
           )}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onToggleDark}
-            aria-label="Toggle dark mode"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-charcoal transition-colors hover:text-sage dark:text-chalk"
-          >
-            {dark ? <Sun className="h-[1.15rem] w-[1.15rem]" /> : <Moon className="h-[1.15rem] w-[1.15rem]" />}
-          </button>
-          <Button to="/contact" className="hidden whitespace-nowrap sm:inline-flex">
-            Book a Call
-          </Button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme toggle lives in the mobile menu below 640px so the header row
+              never overflows a 375–390px phone screen. Wrapped in spans because the
+              Button's own inline-flex would override a `hidden` class on it. */}
+          <span className="hidden sm:block">
+            <ThemeToggle dark={dark} onToggleDark={onToggleDark} />
+          </span>
+          <span className="hidden sm:block">
+            <Button to="/contact" className="whitespace-nowrap">
+              Book a Call
+            </Button>
+          </span>
+          <span className="sm:hidden">
+            <Button to="/contact" className="whitespace-nowrap px-4">
+              Book
+            </Button>
+          </span>
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-charcoal dark:text-chalk lg:hidden"
+            aria-expanded={mobileOpen}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-charcoal dark:text-chalk lg:hidden"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -150,6 +157,10 @@ export function Header({
                 {item.label}
               </NavLink>
             ))}
+            <div className="mt-2 flex items-center justify-between rounded-xl px-4 py-2 sm:hidden">
+              <span className="text-[1.05rem] text-charcoal dark:text-chalk">Theme</span>
+              <ThemeToggle dark={dark} onToggleDark={onToggleDark} />
+            </div>
             <Button to="/contact" size="lg" className="mt-4">
               Book a Discovery Call
             </Button>
@@ -157,5 +168,18 @@ export function Header({
         </div>
       )}
     </header>
+  );
+}
+
+function ThemeToggle({ dark, onToggleDark }: { dark: boolean; onToggleDark: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggleDark}
+      aria-label="Toggle dark mode"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-charcoal transition-colors hover:text-sage dark:text-chalk"
+    >
+      {dark ? <Sun className="h-[1.15rem] w-[1.15rem]" /> : <Moon className="h-[1.15rem] w-[1.15rem]" />}
+    </button>
   );
 }

@@ -23,12 +23,6 @@ export const images = {
     "https://images.unsplash.com/photo-1497215641119-bbe6d71ebaae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   deskChair:
     "https://images.unsplash.com/photo-1511362328651-90cc517fbe31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-  portraitWoman:
-    "https://images.unsplash.com/photo-1781705117331-10010c599e78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
-  portraitWoman2:
-    "https://images.unsplash.com/photo-1758600435036-0c958b8b9704?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
-  portraitMan:
-    "https://images.unsplash.com/photo-1761393255459-862745aa7c31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
 };
 
 /* ---------- Services ---------- */
@@ -163,9 +157,9 @@ export const serviceDetails: Record<string, ServiceDetail> = {
       "Leaders who need a trusted right hand",
     ],
     outcomes: [
-      { value: "12h+", label: "Weekly hours reclaimed" },
-      { value: "48h", label: "Typical onboarding" },
       { value: "1:1", label: "Dedicated matching" },
+      { value: "24–72h", label: "Onboarding window" },
+      { value: "Your tools", label: "No new software to adopt" },
     ],
     faqs: faqPlaceholders("virtual assistant"),
   },
@@ -185,9 +179,9 @@ export const serviceDetails: Record<string, ServiceDetail> = {
       "Growing companies scaling support without losing quality",
     ],
     outcomes: [
-      { value: "50%", label: "Faster response times" },
-      { value: "24/7", label: "Coverage options" },
-      { value: "98%", label: "Satisfaction held steady" },
+      { value: "Dedicated", label: "Support person or pod" },
+      { value: "Documented", label: "Macros and escalation paths" },
+      { value: "24–72h", label: "Onboarding window" },
     ],
     faqs: faqPlaceholders("customer support"),
   },
@@ -207,9 +201,9 @@ export const serviceDetails: Record<string, ServiceDetail> = {
       "Businesses standardizing repeatable processes",
     ],
     outcomes: [
-      { value: "22%", label: "Faster cycle times" },
-      { value: "0", label: "Dropped handoffs" },
-      { value: "100%", label: "Documented process" },
+      { value: "Mapped", label: "Process before placement" },
+      { value: "Named", label: "Owner for every handoff" },
+      { value: "Documented", label: "SOPs from day one" },
     ],
     faqs: faqPlaceholders("workflow support"),
   },
@@ -229,8 +223,8 @@ export const serviceDetails: Record<string, ServiceDetail> = {
       "Businesses standardizing back-office work",
     ],
     outcomes: [
-      { value: "99.5%", label: "Data accuracy" },
-      { value: "48h", label: "Onboarding start" },
+      { value: "Checked", label: "Review steps on data work" },
+      { value: "24–72h", label: "Onboarding window" },
       { value: "1:1", label: "Dedicated support" },
     ],
     faqs: faqPlaceholders("back office support"),
@@ -251,9 +245,9 @@ export const serviceDetails: Record<string, ServiceDetail> = {
       "Executives protecting focus and time",
     ],
     outcomes: [
-      { value: "15h+", label: "Weekly hours saved" },
       { value: "Senior", label: "Talent tier" },
-      { value: "100%", label: "Confidential" },
+      { value: "Discreet", label: "Confidentiality as standard" },
+      { value: "1:1", label: "Dedicated matching" },
     ],
     faqs: faqPlaceholders("executive assistance"),
   },
@@ -331,33 +325,18 @@ export const processSteps = [
 
 /* ---------- Stats ---------- */
 export const stats = [
-  { value: "98%", label: "Client retention" },
-  { value: "24h", label: "Average onboarding start" },
-  { value: "150+", label: "Growth-focused teams supported" },
+  { value: "24–72h", label: "Onboarding window after discovery" },
+  { value: "1:1", label: "Dedicated matching, not a rotating pool" },
   { value: "6", label: "Core support disciplines" },
+  { value: "PH", label: "Dedicated talent based in the Philippines" },
 ];
 
-/* ---------- Testimonials ---------- */
-export const testimonials = [
-  {
-    quote:
-      "SageStone gave us an operational layer we could actually trust. It feels less like outsourcing and more like a part of our team.",
-    name: "Elena Marsh",
-    role: "Founder, Northline Studio",
-  },
-  {
-    quote:
-      "The consistency is what stands out. Our customer response times improved and our tone stayed exactly on-brand.",
-    name: "David Okafor",
-    role: "COO, Meridian Commerce",
-  },
-  {
-    quote:
-      "They understood our workflows quickly and quietly removed the bottlenecks that had been slowing us down for months.",
-    name: "Priya Nair",
-    role: "Operations Lead, Cedar & Co.",
-  },
-];
+/* ---------- Testimonials ----------
+ * Real client quotes only: name, role and company as the client approved them.
+ * Sections that show testimonials are hidden while this list is empty.
+ * (The earlier placeholder quotes were removed: they were not from real clients.) */
+export type Testimonial = { quote: string; name: string; role: string; url?: string };
+export const testimonials: Testimonial[] = [];
 
 /* ---------- Case studies ---------- */
 export type CaseStudy = {
@@ -387,42 +366,6 @@ export const caseStudies: CaseStudy[] = [
     outcome: "500+ events powered and 50,000+ guest photos collected.",
     image: "/case-studies/kuha/kuha-live-slideshow.webp",
     to: "/case-studies/kuha",
-  },
-  {
-    slug: "northline-studio",
-    client: "Northline Studio",
-    industry: "Creative Agency",
-    headline: "Protecting billable focus across a growing team",
-    challenge:
-      "A fast-growing agency was losing senior hours to administrative work and inconsistent client follow-up.",
-    solution:
-      "We embedded two SageStone assistants into their project and account workflows with clear ownership of scheduling and coordination.",
-    outcome: "31% more billable capacity reclaimed within the first quarter.",
-    image: images.woodenDesk,
-  },
-  {
-    slug: "meridian-commerce",
-    client: "Meridian Commerce",
-    industry: "E-commerce",
-    headline: "Steadier customer support through peak season",
-    challenge:
-      "Seasonal spikes were overwhelming a lean internal team and stretching response times.",
-    solution:
-      "A dedicated support pod handled tier-one inquiries across email and chat with documented, on-brand responses.",
-    outcome: "Response time cut in half while satisfaction held steady.",
-    image: images.deskShelves,
-  },
-  {
-    slug: "cedar-co",
-    client: "Cedar & Co.",
-    industry: "Professional Services",
-    headline: "Removing operational bottlenecks",
-    challenge:
-      "Manual handoffs between teams were causing delays and missed deadlines.",
-    solution:
-      "We mapped the workflow and placed an operations specialist to own coordination and documentation.",
-    outcome: "Project cycle time reduced by 22%.",
-    image: images.officeArt,
   },
 ];
 
@@ -457,6 +400,36 @@ export const faqs = [
     question: "Which tools and systems do you work within?",
     answer:
       "We embed into the tools you already use — from project management and CRMs to help desks and communication platforms — rather than asking you to change your stack.",
+  },
+  {
+    category: "Getting Started",
+    question: "Where is my assistant based?",
+    answer:
+      "In the Philippines. SageStone connects U.S. companies with dedicated Filipino talent, chosen for strong English, professionalism and experience supporting remote teams.",
+  },
+  {
+    category: "Getting Started",
+    question: "What should I prepare for the discovery call?",
+    answer:
+      "Nothing formal. A rough list of the tasks that eat your week, the tools you use, and how many hours of help you think you need is plenty. We'll shape the rest together.",
+  },
+  {
+    category: "Working Together",
+    question: "Who manages my assistant day to day?",
+    answer:
+      "You direct the work, inside your own tools. SageStone handles matching, documents your processes during onboarding, and stays involved afterwards to keep quality consistent.",
+  },
+  {
+    category: "Working Together",
+    question: "Can we start with a few tasks and add more later?",
+    answer:
+      "Yes. Most teams start with the work that's slowing them down most, then add hours, tasks or roles once the first engagement is running smoothly.",
+  },
+  {
+    category: "Working Together",
+    question: "I'm already a client. How do I get help?",
+    answer:
+      "Email hello@sagestoneinc.com with \"Client support\" in the subject line, or call +1 (214) 945-2234. We reply within one business day.",
   },
   {
     category: "Trust & Security",
